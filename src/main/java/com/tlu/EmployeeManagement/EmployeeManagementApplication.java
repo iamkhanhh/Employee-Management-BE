@@ -8,6 +8,8 @@ public class EmployeeManagementApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(EmployeeManagementApplication.class, args);
+		System.out.print("Employee Management Application is running...");
+		// mvn spring-boot:run
 	}
 
 }
