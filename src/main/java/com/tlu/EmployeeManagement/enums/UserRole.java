@@ -3,5 +3,6 @@ package com.tlu.EmployeeManagement.enums;
 public enum UserRole {
   ADMIN,
   USER,
-  ARTIST,
+  HR,
+  ACCOUNTANT
 }

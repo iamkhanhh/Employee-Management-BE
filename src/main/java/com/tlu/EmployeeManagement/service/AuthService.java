@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.tlu.EmployeeManagement.dto.request.ForgotPasswordDto;
 import com.tlu.EmployeeManagement.dto.request.LoginDto;
-import com.tlu.EmployeeManagement.dto.request.RegisterUserDto;
-import com.tlu.EmployeeManagement.dto.request.VerifiDto;
+// import com.tlu.EmployeeManagement.dto.request.RegisterUserDto;
+// import com.tlu.EmployeeManagement.dto.request.VerifiDto;
 import com.tlu.EmployeeManagement.entity.User;
 import com.tlu.EmployeeManagement.enums.UserRole;
 import com.tlu.EmployeeManagement.enums.UserStatus;
@@ -74,7 +74,7 @@ public class AuthService {
     private String generateToken(Integer id, String email, String username, UserRole role) {
             JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
             JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                    .issuer("SoundVerse.com")
+                    .issuer("EmployeeManagement.com")
                     .issueTime(new Date())
                     .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.DAYS).toEpochMilli()))
                     .claim("id", String.valueOf(id))
@@ -95,46 +95,42 @@ public class AuthService {
         }
     }
 
-    public String signup(RegisterUserDto input) {
-        if (userRepository.existsByEmail(input.getEmail())) {
-            throw new RuntimeException("Email already exists");
-        }
+    // public String signup(RegisterUserDto input) {
+    //     if (userRepository.existsByEmail(input.getEmail())) {
+    //         throw new RuntimeException("Email already exists");
+    //     }
 
-        User user = new User();
-        user.setUsername(input.getUsername());
-        user.setEmail(input.getEmail());
-        user.setDob(input.getDob());
-        user.setCountry(input.getCountry());
-        user.setPassword(passwordEncoder.encode(input.getPassword()));
-        user.setVerificationCode(generateVerificationCode());
-        user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
-        user.setStatus(UserStatus.PENDING);
-        user.setRole(input.getIsArtist() ? UserRole.ARTIST : UserRole.USER);
-        user.setGender(input.getGender());
-        user.setFullName(input.getFullName());
+    //     User user = new User();
+    //     user.setUsername(input.getUsername());
+    //     user.setEmail(input.getEmail());
+    //     user.setPassword(passwordEncoder.encode(input.getPassword()));
+    //     user.setStatus(UserStatus.PENDING);
+    //     user.setRole(input.getIsArtist() ? UserRole.ARTIST : UserRole.USER);
+    //     user.setGender(input.getGender());
+    //     user.setFullName(input.getFullName());
 
-        sendVerificationEmail(user);
-        userRepository.save(user);
-        return generateToken(user.getId(), user.getEmail(), user.getUsername(), user.getRole());
-    }
+    //     sendVerificationEmail(user);
+    //     userRepository.save(user);
+    //     return generateToken(user.getId(), user.getEmail(), user.getUsername(), user.getRole());
+    // }
 
-    public void verifyUser(VerifiDto input) {
-        User user = userRepository.findByEmail(input.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    // public void verifyUser(VerifiDto input) {
+    //     User user = userRepository.findByEmail(input.getEmail())
+    //             .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Verification code has expired");
-        }
+    //     if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
+    //         throw new RuntimeException("Verification code has expired");
+    //     }
 
-        if (!user.getVerificationCode().equals(input.getVerificationCode())) {
-            throw new RuntimeException("Invalid verification code");
-        }
+    //     if (!user.getVerificationCode().equals(input.getVerificationCode())) {
+    //         throw new RuntimeException("Invalid verification code");
+    //     }
 
-        user.setStatus(UserStatus.ACTIVE);
-        user.setVerificationCode(null);
-        user.setVerificationCodeExpiresAt(null);
-        userRepository.save(user);
-    }
+    //     user.setStatus(UserStatus.ACTIVE);
+    //     user.setVerificationCode(null);
+    //     user.setVerificationCodeExpiresAt(null);
+    //     userRepository.save(user);
+    // }
 
     // public void resendVerificationCode(String email) {
     //     User user = userRepository.findByEmail(email)
@@ -149,32 +145,32 @@ public class AuthService {
     //     userRepository.save(user);
     // }
 
-    private void sendVerificationEmail(User user) {
-        String subject = "Account Verification";
-        String verificationCode = "VERIFICATION CODE " + user.getVerificationCode();
-        String htmlMessage = "<html>"
-                + "<body style=\"font-family: Arial, sans-serif;\">"
-                + "<div style=\"background-color: #f5f5f5; padding: 20px;\">"
-                + "<h2 style=\"color: #333;\">Welcome to our app!</h2>"
-                + "<p style=\"font-size: 16px;\">Please enter the verification code below to continue:</p>"
-                + "<div style=\"background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1);\">"
-                + "<h3 style=\"color: #333;\">Verification Code:</h3>"
-                + "<p style=\"font-size: 18px; font-weight: bold; color: #007bff;\">" + verificationCode + "</p>"
-                + "</div>"
-                + "</div>"
-                + "</body>"
-                + "</html>";
+    // private void sendVerificationEmail(User user) {
+    //     String subject = "Account Verification";
+    //     String verificationCode = "VERIFICATION CODE " + user.getVerificationCode();
+    //     String htmlMessage = "<html>"
+    //             + "<body style=\"font-family: Arial, sans-serif;\">"
+    //             + "<div style=\"background-color: #f5f5f5; padding: 20px;\">"
+    //             + "<h2 style=\"color: #333;\">Welcome to our app!</h2>"
+    //             + "<p style=\"font-size: 16px;\">Please enter the verification code below to continue:</p>"
+    //             + "<div style=\"background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1);\">"
+    //             + "<h3 style=\"color: #333;\">Verification Code:</h3>"
+    //             + "<p style=\"font-size: 18px; font-weight: bold; color: #007bff;\">" + verificationCode + "</p>"
+    //             + "</div>"
+    //             + "</div>"
+    //             + "</body>"
+    //             + "</html>";
 
-        try {
-            emailService.sendVerificationEmail(user.getEmail(), subject, htmlMessage);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
-    }
+    //     try {
+    //         emailService.sendVerificationEmail(user.getEmail(), subject, htmlMessage);
+    //     } catch (MessagingException e) {
+    //         e.printStackTrace();
+    //     }
+    // }
 
-    private String generateVerificationCode() {
-        return String.valueOf(new Random().nextInt(900000) + 100000);
-    }
+    // private String generateVerificationCode() {
+    //     return String.valueOf(new Random().nextInt(900000) + 100000);
+    // }
 
     // public void forgotPassword(ForgotPasswordDto input) {
     //     User user = userRepository.findByEmail(input.getEmail())
