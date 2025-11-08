@@ -24,11 +24,18 @@ import com.tlu.EmployeeManagement.dto.response.PagedResponse;
 import com.tlu.EmployeeManagement.enums.EmployeeStatus;
 import com.tlu.EmployeeManagement.service.EmployeeService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+@Tag(name = "Employee", description = "APIs for managing employees")
 @RestController
 @RequestMapping("/employees")
 @RequiredArgsConstructor
@@ -36,14 +43,15 @@ import lombok.experimental.FieldDefaults;
 public class EmployeeController {
     EmployeeService employeeService;
 
+    @Operation(summary = "Get all employees", description = "Retrieve a paginated list of employees with optional filtering by status, department, hire date, and name search")
     @GetMapping
     public ApiResponse<PagedResponse<EmployeeResponse>> getEmployees(
-            @RequestParam(required = false, defaultValue = "0") Integer page,
-            @RequestParam(required = false, defaultValue = "10") Integer pageSize,
-            @RequestParam(required = false) EmployeeStatus status,
-            @RequestParam(required = false) Integer deptId,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate hireDate,
-            @RequestParam(required = false) String search) {
+            @Parameter(description = "Page number (zero-based)", example = "0") @RequestParam(required = false, defaultValue = "0") Integer page,
+            @Parameter(description = "Number of items per page", example = "10") @RequestParam(required = false, defaultValue = "10") Integer pageSize,
+            @Parameter(description = "Filter by employee status") @RequestParam(required = false) EmployeeStatus status,
+            @Parameter(description = "Filter by department ID") @RequestParam(required = false) Integer deptId,
+            @Parameter(description = "Filter by hire date (format: dd/MM/yyyy)", example = "01/01/2024") @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate hireDate,
+            @Parameter(description = "Search in employee name (case-insensitive)") @RequestParam(required = false) String search) {
 
         EmployeeFilterDto filterDto = EmployeeFilterDto.builder()
             .page(page)
@@ -63,8 +71,10 @@ public class EmployeeController {
         return apiResponse;
     }
 
+    @Operation(summary = "Get employee by ID", description = "Retrieve a single employee by their ID")
     @GetMapping("/{id}")
-    public ApiResponse<EmployeeResponse> getEmployeeById(@PathVariable Integer id) {
+    public ApiResponse<EmployeeResponse> getEmployeeById(
+            @Parameter(description = "Employee ID", required = true, example = "1") @PathVariable Integer id) {
         EmployeeResponse employee = employeeService.getEmployeeById(id);
 
         ApiResponse<EmployeeResponse> apiResponse = new ApiResponse<>();
@@ -74,9 +84,12 @@ public class EmployeeController {
         return apiResponse;
     }
 
+    @Operation(summary = "Create employee", description = "Create a new employee record")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<EmployeeResponse> createEmployee(@Valid @RequestBody EmployeeCreateDto createDto) {
+    public ApiResponse<EmployeeResponse> createEmployee(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Employee creation data", required = true)
+            @Valid @RequestBody EmployeeCreateDto createDto) {
         EmployeeResponse employee = employeeService.createEmployee(createDto);
 
         ApiResponse<EmployeeResponse> apiResponse = new ApiResponse<>();
@@ -86,9 +99,11 @@ public class EmployeeController {
         return apiResponse;
     }
 
+    @Operation(summary = "Update employee", description = "Update an existing employee record. All fields are optional for partial updates.")
     @PutMapping("/{id}")
     public ApiResponse<EmployeeResponse> updateEmployee(
-            @PathVariable Integer id,
+            @Parameter(description = "Employee ID", required = true, example = "1") @PathVariable Integer id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Employee update data", required = true)
             @Valid @RequestBody EmployeeUpdateDto updateDto) {
         EmployeeResponse employee = employeeService.updateEmployee(id, updateDto);
 
@@ -99,9 +114,10 @@ public class EmployeeController {
         return apiResponse;
     }
 
+    @Operation(summary = "Delete employee", description = "Soft delete an employee (sets isDeleted = true)")
     @DeleteMapping("/{id}")
-    // @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ApiResponse<Void> deleteEmployee(@PathVariable Integer id) {
+    public ApiResponse<Void> deleteEmployee(
+            @Parameter(description = "Employee ID", required = true, example = "1") @PathVariable Integer id) {
         employeeService.deleteEmployee(id);
 
         ApiResponse<Void> apiResponse = new ApiResponse<>();

@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.TLU</groupId>
-	<artifactId>SoundVerse</artifactId>
+	<artifactId>EmployeeManagement</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>SoundVerse</name>
-	<description>Demo project for Spring Boot</description>
+	<name>EmployeeManagement</name>
+	<description>EmployeeManagement</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -95,7 +95,12 @@
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>s3</artifactId>
 			<version>2.20.120</version>
-	</dependency>
+		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.7.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
