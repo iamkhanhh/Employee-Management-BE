@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tlu.EmployeeManagement.dto.DepartmentDto;
+import com.tlu.EmployeeManagement.dto.request.DepartmentDto;
 import com.tlu.EmployeeManagement.dto.response.DepartmentResponse;
 import com.tlu.EmployeeManagement.entity.Department;
 import com.tlu.EmployeeManagement.repository.DepartmentRepository;

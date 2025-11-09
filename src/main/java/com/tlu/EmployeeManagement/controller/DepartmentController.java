@@ -1,6 +1,6 @@
 package com.tlu.EmployeeManagement.controller;
 
-import com.tlu.EmployeeManagement.dto.DepartmentDto;
+import com.tlu.EmployeeManagement.dto.request.DepartmentDto;
 import com.tlu.EmployeeManagement.dto.response.DepartmentResponse;
 import com.tlu.EmployeeManagement.service.DepartmentService;
 import com.tlu.EmployeeManagement.dto.response.ApiResponse;
