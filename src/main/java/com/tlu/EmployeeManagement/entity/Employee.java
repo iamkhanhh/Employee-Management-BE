@@ -1,6 +1,7 @@
 package com.tlu.EmployeeManagement.entity;
 
 import java.time.LocalDate;
+import java.math.BigDecimal;
 
 import com.tlu.EmployeeManagement.enums.EmployeeStatus;
 import com.tlu.EmployeeManagement.enums.Gender;
