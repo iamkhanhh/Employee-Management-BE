@@ -19,6 +19,11 @@ import com.tlu.EmployeeManagement.dto.response.UserResponse;
 import com.tlu.EmployeeManagement.service.AuthService;
 // import com.tlu.EmployeeManagement.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.AccessLevel;
 
+@Tag(name = "Authentication", description = "APIs for user authentication and authorization")
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -34,8 +40,24 @@ public class AuthController {
     AuthService authService;
     // UserService userService;
 
+    @Operation(
+        summary = "Login",
+        description = "Authenticate user with email and password. Returns JWT token in HttpOnly cookie (access_token) with 5 days expiry."
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "200",
+        description = "Login successful",
+        content = @Content(schema = @Schema(implementation = ApiResponse.class))
+    )
     @PostMapping("/login")
-    ApiResponse<AuthResponse> authenticate(@RequestBody LoginDto request, HttpServletResponse response) {
+    public ApiResponse<AuthResponse> authenticate(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "Login credentials (email and password)",
+                required = true,
+                content = @Content(schema = @Schema(implementation = LoginDto.class))
+            )
+            @RequestBody LoginDto request,
+            HttpServletResponse response) {
         String token = authService.authenticate(request);
 
         Cookie jwtCookie = new Cookie("access_token", token);
@@ -54,22 +76,31 @@ public class AuthController {
         return apiResponse;
     }
 
-    // @PostMapping("/logout")
-    // public ApiResponse<Void> logout(HttpServletResponse response) {
-    //     Cookie jwtCookie = new Cookie("access_token", null);
-    //     jwtCookie.setHttpOnly(true);
-    //     jwtCookie.setSecure(false);
-    //     jwtCookie.setPath("/");
-    //     jwtCookie.setMaxAge(0);
-    //     jwtCookie.setAttribute("SameSite", "Strict");
+    @Operation(
+        summary = "Logout",
+        description = "Logout user by clearing the access_token cookie. Sets cookie maxAge to 0 to delete it from browser."
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "200",
+        description = "Logout successful",
+        content = @Content(schema = @Schema(implementation = ApiResponse.class))
+    )
+    @PostMapping("/logout")
+    public ApiResponse<Void> logout(HttpServletResponse response) {
+        Cookie jwtCookie = new Cookie("access_token", null);
+        jwtCookie.setHttpOnly(true);
+        jwtCookie.setSecure(false);
+        jwtCookie.setPath("/");
+        jwtCookie.setMaxAge(0);
+        jwtCookie.setAttribute("SameSite", "Strict");
 
-    //     response.addCookie(jwtCookie);
+        response.addCookie(jwtCookie);
 
-    //     ApiResponse<Void> apiResponse = new ApiResponse<>();
-    //     apiResponse.setStatus("success");
-    //     apiResponse.setMessage("Logout successfully");
-    //     return apiResponse;
-    // }
+        ApiResponse<Void> apiResponse = new ApiResponse<>();
+        apiResponse.setStatus("success");
+        apiResponse.setMessage("Logout successfully");
+        return apiResponse;
+    }
 
     // @GetMapping("/me")
     // public ResponseEntity<UserResponse> getUserById(HttpServletRequest request) {

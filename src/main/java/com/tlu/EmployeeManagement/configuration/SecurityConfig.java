@@ -35,17 +35,23 @@ import java.util.Map;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final String[] PUBLIC_ENDPOINTS = { "/users", "/auth/**" };
+    private final String[] PUBLIC_ENDPOINTS = { "/auth/**" };
+    private final String[] SWAGGER_ENDPOINTS = {
+        "/swagger-ui/**",
+        "/v3/api-docs/**",
+        "/swagger-resources/**",
+        "/swagger-ui.html"
+    };
 
     @Value("${jwt.signerKey}")
     private String signerKey;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
-                .permitAll()
-                .anyRequest()
-                .authenticated());
+        httpSecurity.authorizeHttpRequests(request -> request
+                .requestMatchers(SWAGGER_ENDPOINTS).permitAll()
+                .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
+                .anyRequest().authenticated());
 
         httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder())));
 
@@ -82,7 +88,16 @@ public class SecurityConfig {
     @Bean
     public Filter jwtAuthenticationFilter() {
         return (request, response, chain) -> {
-            String token = getTokenFromCookie((HttpServletRequest) request);
+            HttpServletRequest httpRequest = (HttpServletRequest) request;
+            String requestPath = httpRequest.getRequestURI();
+
+            // First, try to get token from cookie
+            String token = getTokenFromCookie(httpRequest);
+
+            // If no token in cookie, try to get from Authorization header
+            if (token == null) {
+                token = getTokenFromAuthorizationHeader(httpRequest);
+            }
 
             if (token != null) {
                 try {
@@ -123,7 +138,14 @@ public class SecurityConfig {
                 }
             }
         }
-        System.out.println("No access_token cookie found!");
+        return null;
+    }
+
+    private String getTokenFromAuthorizationHeader(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return authorizationHeader.substring(7); // Remove "Bearer " prefix
+        }
         return null;
     }
 }
