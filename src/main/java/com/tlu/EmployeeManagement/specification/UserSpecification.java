@@ -1,0 +1,55 @@
+package com.tlu.EmployeeManagement.specification;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.data.jpa.domain.Specification;
+
+import com.tlu.EmployeeManagement.entity.Employee;
+import com.tlu.EmployeeManagement.entity.User;
+import com.tlu.EmployeeManagement.enums.UserStatus;
+
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
+
+public class UserSpecification {
+
+    public static Specification<User> filterUser(
+            UserStatus status,
+            String country,
+            Integer deptId,
+            String search    
+    ) {
+
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Filter UserStatus
+            if (status != null) {
+                predicates.add(cb.equal(root.get("status"), status));
+            }
+
+            // Filter country
+            if (country != null && !country.isEmpty()) {
+                predicates.add(cb.equal(root.get("country"), country));
+            }
+
+            // Search by username/email
+            if (search != null && !search.isEmpty()) {
+                String pattern = "%" + search.toLowerCase() + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("username")), pattern),
+                        cb.like(cb.lower(root.get("email")), pattern)
+                ));
+            }
+
+            if (deptId != null) {
+                Join<User, Employee> employeeJoin = root.join("id"); // join với Employee qua userId
+                predicates.add(cb.equal(employeeJoin.get("deptId"), deptId));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+}

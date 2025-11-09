@@ -45,6 +45,9 @@ public class Employee extends AbtractEntity {
     @Column(name = "hire_date")
     private LocalDate hireDate;
 
+    @Column(name = "basic_salary", precision = 12, scale = 2)
+    private BigDecimal basicSalary;
+
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private EmployeeStatus status = EmployeeStatus.ACTIVE;

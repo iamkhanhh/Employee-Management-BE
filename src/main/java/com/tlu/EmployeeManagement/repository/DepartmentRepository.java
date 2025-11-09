@@ -11,13 +11,6 @@ import com.tlu.EmployeeManagement.entity.Department;
 
 @Repository
 public interface DepartmentRepository extends JpaRepository<Department, Integer> {
-
-    Optional<Department> findById(Integer id);
-
-    @Query("SELECT d FROM Department d WHERE d.isDeleted = false")
-    List<Department> findAllActive();
-
+    List<Department> findByIsDeletedFalse();
     Optional<Department> findByDeptName(String deptName);
-
-    void deleteById(Integer id);
 }
