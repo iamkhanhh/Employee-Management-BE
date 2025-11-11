@@ -14,4 +14,23 @@ public class Department extends AbtractEntity {
 
     @Column(name = "dept_name", length = 100)
     private String deptName;
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private String deptName;
+
+        public Builder deptName(String deptName) {
+            this.deptName = deptName;
+            return this;
+        }
+
+        public Department build() {
+            Department department = new Department();
+            department.deptName = this.deptName;
+            return department;
+        }
+    }
 }

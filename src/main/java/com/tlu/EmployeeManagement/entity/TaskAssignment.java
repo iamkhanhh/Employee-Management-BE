@@ -22,4 +22,37 @@ public class TaskAssignment extends AbtractEntity {
 
     @Column(name = "completed_date")
     private LocalDateTime completedDate;
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private Integer taskId;
+        private Integer empId;
+        private LocalDateTime completedDate;
+
+        public Builder taskId(Integer taskId) {
+            this.taskId = taskId;
+            return this;
+        }
+
+        public Builder empId(Integer empId) {
+            this.empId = empId;
+            return this;
+        }
+
+        public Builder completedDate(LocalDateTime completedDate) {
+            this.completedDate = completedDate;
+            return this;
+        }
+
+        public TaskAssignment build() {
+            TaskAssignment taskAssignment = new TaskAssignment();
+            taskAssignment.taskId = this.taskId;
+            taskAssignment.empId = this.empId;
+            taskAssignment.completedDate = this.completedDate;
+            return taskAssignment;
+        }
+    }
 }

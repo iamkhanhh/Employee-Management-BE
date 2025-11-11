@@ -20,4 +20,37 @@ public class Notification extends AbtractEntity {
 
     @Column(name = "created_by")
     private Integer createdBy;
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private String title;
+        private String content;
+        private Integer createdBy;
+
+        public Builder title(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public Builder content(String content) {
+            this.content = content;
+            return this;
+        }
+
+        public Builder createdBy(Integer createdBy) {
+            this.createdBy = createdBy;
+            return this;
+        }
+
+        public Notification build() {
+            Notification notification = new Notification();
+            notification.title = this.title;
+            notification.content = this.content;
+            notification.createdBy = this.createdBy;
+            return notification;
+        }
+    }
 }

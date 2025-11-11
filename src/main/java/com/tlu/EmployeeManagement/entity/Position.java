@@ -17,4 +17,30 @@ public class Position extends AbtractEntity {
 
     @Column(length = 255)
     private String description;
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private String positionName;
+        private String description;
+
+        public Builder positionName(String positionName) {
+            this.positionName = positionName;
+            return this;
+        }
+
+        public Builder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Position build() {
+            Position position = new Position();
+            position.positionName = this.positionName;
+            position.description = this.description;
+            return position;
+        }
+    }
 }

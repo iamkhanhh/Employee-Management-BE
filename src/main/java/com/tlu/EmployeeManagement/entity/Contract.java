@@ -38,4 +38,58 @@ public class Contract extends AbtractEntity {
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private ContractStatus status = ContractStatus.ACTIVE;
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private Integer empId;
+        private ContractType contractType;
+        private LocalDate startDate;
+        private LocalDate endDate;
+        private String fileUrl;
+        private ContractStatus status;
+
+        public Builder empId(Integer empId) {
+            this.empId = empId;
+            return this;
+        }
+
+        public Builder contractType(ContractType contractType) {
+            this.contractType = contractType;
+            return this;
+        }
+
+        public Builder startDate(LocalDate startDate) {
+            this.startDate = startDate;
+            return this;
+        }
+
+        public Builder endDate(LocalDate endDate) {
+            this.endDate = endDate;
+            return this;
+        }
+
+        public Builder fileUrl(String fileUrl) {
+            this.fileUrl = fileUrl;
+            return this;
+        }
+
+        public Builder status(ContractStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public Contract build() {
+            Contract contract = new Contract();
+            contract.empId = this.empId;
+            contract.contractType = this.contractType;
+            contract.startDate = this.startDate;
+            contract.endDate = this.endDate;
+            contract.fileUrl = this.fileUrl;
+            contract.status = this.status != null ? this.status : ContractStatus.ACTIVE;
+            return contract;
+        }
+    }
 }
