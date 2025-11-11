@@ -1,4 +1,4 @@
-package com.tlu.EmployeeManagement.dto;
+package com.tlu.EmployeeManagement.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
