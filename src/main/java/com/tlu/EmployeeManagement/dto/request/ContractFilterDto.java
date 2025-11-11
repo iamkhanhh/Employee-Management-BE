@@ -3,7 +3,8 @@ package com.tlu.EmployeeManagement.dto.request;
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.tlu.EmployeeManagement.enums.UserStatus;
+import com.tlu.EmployeeManagement.enums.ContractStatus;
+import com.tlu.EmployeeManagement.enums.ContractType;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -15,22 +16,23 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserFilterDto {
+public class ContractFilterDto {
 
     Integer page = 0;
 
     Integer pageSize = 10;
 
-    UserStatus status;
+    ContractStatus status;
 
-    String country;
+    ContractType contractType;
 
-    Integer deptId;
+    Integer empId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-    LocalDate dob;
+    LocalDate startDate;
 
-    String search;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    LocalDate endDate;
 
     public static Builder builder() {
         return new Builder();
@@ -39,11 +41,11 @@ public class UserFilterDto {
     public static class Builder {
         private Integer page = 0;
         private Integer pageSize = 10;
-        private UserStatus status;
-        private String country;
-        private Integer deptId;
-        private LocalDate dob;
-        private String search;
+        private ContractStatus status;
+        private ContractType contractType;
+        private Integer empId;
+        private LocalDate startDate;
+        private LocalDate endDate;
 
         public Builder page(Integer page) {
             this.page = page;
@@ -55,42 +57,41 @@ public class UserFilterDto {
             return this;
         }
 
-        public Builder status(UserStatus status) {
+        public Builder status(ContractStatus status) {
             this.status = status;
             return this;
         }
 
-        public Builder country(String country) {
-            this.country = country;
+        public Builder contractType(ContractType contractType) {
+            this.contractType = contractType;
             return this;
         }
 
-        public Builder deptId(Integer deptId) {
-            this.deptId = deptId;
+        public Builder empId(Integer empId) {
+            this.empId = empId;
             return this;
         }
 
-        public Builder dob(LocalDate dob) {
-            this.dob = dob;
+        public Builder startDate(LocalDate startDate) {
+            this.startDate = startDate;
             return this;
         }
 
-        public Builder search(String search) {
-            this.search = search;
+        public Builder endDate(LocalDate endDate) {
+            this.endDate = endDate;
             return this;
         }
 
-        public UserFilterDto build() {
-            UserFilterDto dto = new UserFilterDto();
+        public ContractFilterDto build() {
+            ContractFilterDto dto = new ContractFilterDto();
             dto.page = this.page;
             dto.pageSize = this.pageSize;
             dto.status = this.status;
-            dto.country = this.country;
-            dto.deptId = this.deptId;
-            dto.dob = this.dob;
-            dto.search = this.search;
+            dto.contractType = this.contractType;
+            dto.empId = this.empId;
+            dto.startDate = this.startDate;
+            dto.endDate = this.endDate;
             return dto;
         }
     }
-
 }
