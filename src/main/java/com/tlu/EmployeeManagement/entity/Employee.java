@@ -1,6 +1,7 @@
 package com.tlu.EmployeeManagement.entity;
 
 import java.time.LocalDate;
+import java.math.BigDecimal;
 
 import com.tlu.EmployeeManagement.enums.EmployeeStatus;
 import com.tlu.EmployeeManagement.enums.Gender;
@@ -44,6 +45,9 @@ public class Employee extends AbtractEntity {
 
     @Column(name = "hire_date")
     private LocalDate hireDate;
+
+    @Column(name = "basic_salary", precision = 12, scale = 2)
+    private BigDecimal basicSalary;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
