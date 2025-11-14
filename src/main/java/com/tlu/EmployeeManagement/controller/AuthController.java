@@ -17,7 +17,7 @@ import com.tlu.EmployeeManagement.dto.response.ApiResponse;
 import com.tlu.EmployeeManagement.dto.response.AuthResponse;
 import com.tlu.EmployeeManagement.dto.response.UserResponse;
 import com.tlu.EmployeeManagement.service.AuthService;
-// import com.tlu.EmployeeManagement.service.UserService;
+import com.tlu.EmployeeManagement.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,7 +38,7 @@ import lombok.AccessLevel;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthController {
     AuthService authService;
-    // UserService userService;
+    UserService userService;
 
     @Operation(
         summary = "Login",
