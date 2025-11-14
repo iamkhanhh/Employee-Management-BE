@@ -172,11 +172,76 @@ public class AuthService {
     //     return String.valueOf(new Random().nextInt(900000) + 100000);
     // }
 
-    // public void forgotPassword(ForgotPasswordDto input) {
-    //     User user = userRepository.findByEmail(input.getEmail())
-    //     .orElseThrow(() -> new RuntimeException("User not found"));
-    //     user.setPassword(passwordEncoder.encode(input.getNewPassword())); 
-    //     userRepository.save(user);
-    // }
+    public void forgotPassword(ForgotPasswordDto input) {
+        User user = userRepository.findByEmail(input.getEmail())
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Generate a new random password
+        String newPassword = generateRandomPassword();
+
+        // Update user password
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // Send email with new password
+        sendPasswordResetEmail(user, newPassword);
+    }
+
+    private String generateRandomPassword() {
+        String upperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String lowerCaseChars = "abcdefghijklmnopqrstuvwxyz";
+        String numberChars = "0123456789";
+        String specialChars = "!@#$%^&*";
+
+        String allChars = upperCaseChars + lowerCaseChars + numberChars + specialChars;
+        Random random = new Random();
+        StringBuilder password = new StringBuilder();
+
+        // Ensure password has at least one character from each category
+        password.append(upperCaseChars.charAt(random.nextInt(upperCaseChars.length())));
+        password.append(lowerCaseChars.charAt(random.nextInt(lowerCaseChars.length())));
+        password.append(numberChars.charAt(random.nextInt(numberChars.length())));
+        password.append(specialChars.charAt(random.nextInt(specialChars.length())));
+
+        // Fill the rest randomly (total length: 12 characters)
+        for (int i = 4; i < 12; i++) {
+            password.append(allChars.charAt(random.nextInt(allChars.length())));
+        }
+
+        // Shuffle the password to randomize character positions
+        char[] passwordArray = password.toString().toCharArray();
+        for (int i = passwordArray.length - 1; i > 0; i--) {
+            int j = random.nextInt(i + 1);
+            char temp = passwordArray[i];
+            passwordArray[i] = passwordArray[j];
+            passwordArray[j] = temp;
+        }
+
+        return new String(passwordArray);
+    }
+
+    private void sendPasswordResetEmail(User user, String newPassword) {
+        String subject = "Password Reset Request";
+        String htmlMessage = "<html>"
+                + "<body style=\"font-family: Arial, sans-serif;\">"
+                + "<div style=\"background-color: #f5f5f5; padding: 20px;\">"
+                + "<h2 style=\"color: #333;\">Password Reset</h2>"
+                + "<p style=\"font-size: 16px;\">Your password has been reset successfully.</p>"
+                + "<p style=\"font-size: 16px;\">Your new temporary password is:</p>"
+                + "<div style=\"background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1);\">"
+                + "<h3 style=\"color: #333;\">New Password:</h3>"
+                + "<p style=\"font-size: 18px; font-weight: bold; color: #007bff;\">" + newPassword + "</p>"
+                + "</div>"
+                + "<p style=\"font-size: 14px; color: #666; margin-top: 20px;\">Please change this password after logging in for security purposes.</p>"
+                + "</div>"
+                + "</body>"
+                + "</html>";
+
+        try {
+            emailService.sendVerificationEmail(user.getEmail(), subject, htmlMessage);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send password reset email", e);
+        }
+    }
 
 }
