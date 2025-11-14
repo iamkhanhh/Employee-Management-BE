@@ -102,11 +102,11 @@ public class AuthController {
         return apiResponse;
     }
 
-    // @GetMapping("/me")
-    // public ResponseEntity<UserResponse> getUserById(HttpServletRequest request) {
-    //     UserResponse userResponse = userService.getUserInfo(request);
-    //     return ResponseEntity.ok(userResponse);
-    // }
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getUserById(HttpServletRequest request) {
+        UserResponse userResponse = userService.getUserInfo(request);
+        return ResponseEntity.ok(userResponse);
+    }
 
 
     // @PostMapping("/signup")
@@ -167,23 +167,23 @@ public class AuthController {
     //     }
     // }
 
-    // @PostMapping("/forgot_password")
-    // public ApiResponse<Void> forgotPassword(@RequestBody ForgotPasswordDto input) {
-    //     try {
-    //         authService.forgotPassword(input);
+    @PostMapping("/forgot_password")
+    public ApiResponse<Void> forgotPassword(@RequestBody ForgotPasswordDto input) {
+        try {
+            authService.forgotPassword(input);
 
-    //         ApiResponse<Void> successResponse = new ApiResponse<>();
-    //         successResponse.setStatus("success");
-    //         successResponse.setMessage("Change Password Successfully");
+            ApiResponse<Void> successResponse = new ApiResponse<>();
+            successResponse.setStatus("success");
+            successResponse.setMessage("Change Password Successfully");
 
-    //         return successResponse;
-    //     } catch (RuntimeException e) {
-    //         ApiResponse<Void> errorResponse = new ApiResponse<>();
-    //         errorResponse.setStatus("failed");
-    //         errorResponse.setMessage(e.getMessage());
+            return successResponse;
+        } catch (RuntimeException e) {
+            ApiResponse<Void> errorResponse = new ApiResponse<>();
+            errorResponse.setStatus("failed");
+            errorResponse.setMessage(e.getMessage());
 
-    //         return errorResponse;
-    //     }
-    // }
+            return errorResponse;
+        }
+    }
 
 }

@@ -34,4 +34,51 @@ public class Task extends AbtractEntity {
 
     @Column(name = "due_date")
     private LocalDate dueDate;
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private String title;
+        private String description;
+        private TaskStatus status;
+        private Integer createdBy;
+        private LocalDate dueDate;
+
+        public Builder title(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public Builder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder status(TaskStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public Builder createdBy(Integer createdBy) {
+            this.createdBy = createdBy;
+            return this;
+        }
+
+        public Builder dueDate(LocalDate dueDate) {
+            this.dueDate = dueDate;
+            return this;
+        }
+
+        public Task build() {
+            Task task = new Task();
+            task.title = this.title;
+            task.description = this.description;
+            task.status = this.status != null ? this.status : TaskStatus.PENDING;
+            task.createdBy = this.createdBy;
+            task.dueDate = this.dueDate;
+            return task;
+        }
+    }
 }

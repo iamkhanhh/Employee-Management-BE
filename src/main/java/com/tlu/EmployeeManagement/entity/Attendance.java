@@ -26,4 +26,44 @@ public class Attendance extends AbtractEntity {
 
     @Column(name = "overtime_hours", precision = 5, scale = 2)
     private BigDecimal overtimeHours;
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private Integer empId;
+        private LocalDateTime checkIn;
+        private LocalDateTime checkOut;
+        private BigDecimal overtimeHours;
+
+        public Builder empId(Integer empId) {
+            this.empId = empId;
+            return this;
+        }
+
+        public Builder checkIn(LocalDateTime checkIn) {
+            this.checkIn = checkIn;
+            return this;
+        }
+
+        public Builder checkOut(LocalDateTime checkOut) {
+            this.checkOut = checkOut;
+            return this;
+        }
+
+        public Builder overtimeHours(BigDecimal overtimeHours) {
+            this.overtimeHours = overtimeHours;
+            return this;
+        }
+
+        public Attendance build() {
+            Attendance attendance = new Attendance();
+            attendance.empId = this.empId;
+            attendance.checkIn = this.checkIn;
+            attendance.checkOut = this.checkOut;
+            attendance.overtimeHours = this.overtimeHours;
+            return attendance;
+        }
+    }
 }

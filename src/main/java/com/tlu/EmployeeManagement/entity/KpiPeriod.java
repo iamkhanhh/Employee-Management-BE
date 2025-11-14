@@ -22,4 +22,37 @@ public class KpiPeriod extends AbtractEntity {
 
     @Column(name = "end_date")
     private LocalDate endDate;
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private String periodName;
+        private LocalDate startDate;
+        private LocalDate endDate;
+
+        public Builder periodName(String periodName) {
+            this.periodName = periodName;
+            return this;
+        }
+
+        public Builder startDate(LocalDate startDate) {
+            this.startDate = startDate;
+            return this;
+        }
+
+        public Builder endDate(LocalDate endDate) {
+            this.endDate = endDate;
+            return this;
+        }
+
+        public KpiPeriod build() {
+            KpiPeriod kpiPeriod = new KpiPeriod();
+            kpiPeriod.periodName = this.periodName;
+            kpiPeriod.startDate = this.startDate;
+            kpiPeriod.endDate = this.endDate;
+            return kpiPeriod;
+        }
+    }
 }

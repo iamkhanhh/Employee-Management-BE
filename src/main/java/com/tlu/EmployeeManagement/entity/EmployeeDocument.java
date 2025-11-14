@@ -25,4 +25,37 @@ public class EmployeeDocument extends AbtractEntity {
 
     @Column(name = "file_url", length = 255)
     private String fileUrl;
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private Integer empId;
+        private DocumentType docType;
+        private String fileUrl;
+
+        public Builder empId(Integer empId) {
+            this.empId = empId;
+            return this;
+        }
+
+        public Builder docType(DocumentType docType) {
+            this.docType = docType;
+            return this;
+        }
+
+        public Builder fileUrl(String fileUrl) {
+            this.fileUrl = fileUrl;
+            return this;
+        }
+
+        public EmployeeDocument build() {
+            EmployeeDocument employeeDocument = new EmployeeDocument();
+            employeeDocument.empId = this.empId;
+            employeeDocument.docType = this.docType;
+            employeeDocument.fileUrl = this.fileUrl;
+            return employeeDocument;
+        }
+    }
 }
