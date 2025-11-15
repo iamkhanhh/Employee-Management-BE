@@ -1,6 +1,7 @@
 package com.tlu.EmployeeManagement.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -38,9 +39,8 @@ public class UserService {
         // Build specification for filtering
         Specification<User> spec = UserSpecification.filterUser(
         filterDto.getStatus(),
-        filterDto.getCountry(),
         filterDto.getDeptId(),
-        filterDto.getSearch()  // nếu muốn filter qua department
+        filterDto.getSearch()
     );
 
         // Create pageable with sorting by createdAt descending
