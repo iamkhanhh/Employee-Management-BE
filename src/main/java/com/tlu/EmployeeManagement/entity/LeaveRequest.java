@@ -35,6 +35,9 @@ public class LeaveRequest extends AbtractEntity {
     @Column(length = 255)
     private String reason;
 
+    @Column(name = "reject_reason", length = 255)
+    private String rejectReason; 
+
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private LeaveStatus status = LeaveStatus.PENDING;

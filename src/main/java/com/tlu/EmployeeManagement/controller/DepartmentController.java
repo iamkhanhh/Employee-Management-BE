@@ -4,6 +4,8 @@ import com.tlu.EmployeeManagement.dto.request.DepartmentDto;
 import com.tlu.EmployeeManagement.dto.response.DepartmentResponse;
 import com.tlu.EmployeeManagement.service.DepartmentService;
 import com.tlu.EmployeeManagement.dto.response.ApiResponse;
+import com.tlu.EmployeeManagement.dto.response.DepartmentSummaryDto;
+
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,14 +36,13 @@ public class DepartmentController {
         summary = "Get all departments",
         description = "Retrieve a list of all departments"
     )
-    @GetMapping
-    public ApiResponse<List<DepartmentResponse>> getAllDepartments() {
-        List<DepartmentResponse> departments = departmentService.getAllDepartments();
-
-        return ApiResponse.<List<DepartmentResponse>>builder()
+    @GetMapping()
+    public ApiResponse<List<DepartmentSummaryDto>> getDepartmentSummaries() {
+        List<DepartmentSummaryDto> summaries = departmentService.getDepartmentSummaries();
+        return ApiResponse.<List<DepartmentSummaryDto>>builder()
                 .status("success")
-                .message("Get all departments successfully")
-                .data(departments)
+                .message("Get department summaries successfully")
+                .data(summaries)
                 .build();
     }
 

@@ -15,6 +15,8 @@ public class DepartmentResponse {
     Integer id;
 
     String deptName;
+    
+    Integer employeeId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     LocalDateTime createdAt;

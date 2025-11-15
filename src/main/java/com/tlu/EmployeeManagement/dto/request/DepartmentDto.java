@@ -1,5 +1,6 @@
 package com.tlu.EmployeeManagement.dto.request;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -15,6 +16,9 @@ public class DepartmentDto {
     @NotBlank(message = "Department name is required")
     String deptName;
 
+    @NotNull(message = "Manager ID is required")
+    Integer employeeId;
+
     public static Builder builder() {
         return new Builder();
     }
@@ -27,10 +31,17 @@ public class DepartmentDto {
             return this;
         }
 
+        public Builder employeeId(Integer employeeId) {
+            this.employeeId = employeeId;
+            return this;
+        }
+
         public DepartmentDto build() {
             DepartmentDto dto = new DepartmentDto();
             dto.deptName = this.deptName;
+            dto.employeeId = this.employeeId;
             return dto;
         }
     }
+    
 }

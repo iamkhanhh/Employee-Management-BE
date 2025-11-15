@@ -13,5 +13,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer>, Jp
 
     Optional<Employee> findById(Integer id);
 
+    Optional<Employee> findByUserId(Integer userId);
+
+    long countByDeptId(Integer deptId);
+
     void deleteById(Integer id);
 }
