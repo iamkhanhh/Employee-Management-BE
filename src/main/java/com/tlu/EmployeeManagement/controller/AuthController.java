@@ -17,7 +17,7 @@ import com.tlu.EmployeeManagement.dto.response.ApiResponse;
 import com.tlu.EmployeeManagement.dto.response.AuthResponse;
 import com.tlu.EmployeeManagement.dto.response.UserResponse;
 import com.tlu.EmployeeManagement.service.AuthService;
-// import com.tlu.EmployeeManagement.service.UserService;
+import com.tlu.EmployeeManagement.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,7 +38,7 @@ import lombok.AccessLevel;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthController {
     AuthService authService;
-    // UserService userService;
+    UserService userService;
 
     @Operation(
         summary = "Login",
@@ -102,11 +102,20 @@ public class AuthController {
         return apiResponse;
     }
 
-    // @GetMapping("/me")
-    // public ResponseEntity<UserResponse> getUserById(HttpServletRequest request) {
-    //     UserResponse userResponse = userService.getUserInfo(request);
-    //     return ResponseEntity.ok(userResponse);
-    // }
+    @Operation(
+        summary = "Get current user",
+        description = "Get the current authenticated user's information from the JWT token in the cookie"
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "200",
+        description = "User information retrieved successfully",
+        content = @Content(schema = @Schema(implementation = UserResponse.class))
+    )
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getUserById(HttpServletRequest request) {
+        UserResponse userResponse = userService.getUserInfo(request);
+        return ResponseEntity.ok(userResponse);
+    }
 
 
     // @PostMapping("/signup")
@@ -167,23 +176,38 @@ public class AuthController {
     //     }
     // }
 
-    // @PostMapping("/forgot_password")
-    // public ApiResponse<Void> forgotPassword(@RequestBody ForgotPasswordDto input) {
-    //     try {
-    //         authService.forgotPassword(input);
+    @Operation(
+        summary = "Forgot password",
+        description = "Reset user password by providing email and new password"
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "200",
+        description = "Password changed successfully",
+        content = @Content(schema = @Schema(implementation = ApiResponse.class))
+    )
+    @PostMapping("/forgot_password")
+    public ApiResponse<Void> forgotPassword(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "Forgot password request (email and new password)",
+                required = true,
+                content = @Content(schema = @Schema(implementation = ForgotPasswordDto.class))
+            )
+            @RequestBody ForgotPasswordDto input) {
+        try {
+            authService.forgotPassword(input);
 
-    //         ApiResponse<Void> successResponse = new ApiResponse<>();
-    //         successResponse.setStatus("success");
-    //         successResponse.setMessage("Change Password Successfully");
+            ApiResponse<Void> successResponse = new ApiResponse<>();
+            successResponse.setStatus("success");
+            successResponse.setMessage("Change Password Successfully");
 
-    //         return successResponse;
-    //     } catch (RuntimeException e) {
-    //         ApiResponse<Void> errorResponse = new ApiResponse<>();
-    //         errorResponse.setStatus("failed");
-    //         errorResponse.setMessage(e.getMessage());
+            return successResponse;
+        } catch (RuntimeException e) {
+            ApiResponse<Void> errorResponse = new ApiResponse<>();
+            errorResponse.setStatus("failed");
+            errorResponse.setMessage(e.getMessage());
 
-    //         return errorResponse;
-    //     }
-    // }
+            return errorResponse;
+        }
+    }
 
 }

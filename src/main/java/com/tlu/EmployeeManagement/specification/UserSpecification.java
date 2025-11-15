@@ -17,9 +17,8 @@ public class UserSpecification {
 
     public static Specification<User> filterUser(
             UserStatus status,
-            String country,
             Integer deptId,
-            String search    
+            String search
     ) {
 
         return (root, query, cb) -> {
@@ -28,11 +27,6 @@ public class UserSpecification {
             // Filter UserStatus
             if (status != null) {
                 predicates.add(cb.equal(root.get("status"), status));
-            }
-
-            // Filter country
-            if (country != null && !country.isEmpty()) {
-                predicates.add(cb.equal(root.get("country"), country));
             }
 
             // Search by username/email

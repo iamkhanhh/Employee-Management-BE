@@ -38,4 +38,86 @@ public class UserUpdateDto {
 
     private UserStatus status;
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private String username;
+        private String currentPassword;
+        private String password;
+        private String gender;
+        private String country;
+        private String fullName;
+        private String profilePicImage;
+        private LocalDate dob;
+        private UserRole role;
+        private UserStatus status;
+
+        public Builder username(String username) {
+            this.username = username;
+            return this;
+        }
+
+        public Builder currentPassword(String currentPassword) {
+            this.currentPassword = currentPassword;
+            return this;
+        }
+
+        public Builder password(String password) {
+            this.password = password;
+            return this;
+        }
+
+        public Builder gender(String gender) {
+            this.gender = gender;
+            return this;
+        }
+
+        public Builder country(String country) {
+            this.country = country;
+            return this;
+        }
+
+        public Builder fullName(String fullName) {
+            this.fullName = fullName;
+            return this;
+        }
+
+        public Builder profilePicImage(String profilePicImage) {
+            this.profilePicImage = profilePicImage;
+            return this;
+        }
+
+        public Builder dob(LocalDate dob) {
+            this.dob = dob;
+            return this;
+        }
+
+        public Builder role(UserRole role) {
+            this.role = role;
+            return this;
+        }
+
+        public Builder status(UserStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public UserUpdateDto build() {
+            UserUpdateDto dto = new UserUpdateDto();
+            dto.username = this.username;
+            dto.currentPassword = this.currentPassword;
+            dto.password = this.password;
+            dto.gender = this.gender;
+            dto.country = this.country;
+            dto.fullName = this.fullName;
+            dto.profilePicImage = this.profilePicImage;
+            dto.dob = this.dob;
+            dto.role = this.role;
+            dto.status = this.status;
+            return dto;
+        }
+    }
+
 }

@@ -13,4 +13,6 @@ import com.tlu.EmployeeManagement.entity.Department;
 public interface DepartmentRepository extends JpaRepository<Department, Integer> {
     List<Department> findByIsDeletedFalse();
     Optional<Department> findByDeptName(String deptName);
+    boolean existsByEmployeeId(Integer employeeId);
+
 }

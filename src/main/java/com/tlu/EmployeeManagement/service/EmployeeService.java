@@ -24,6 +24,7 @@ import com.tlu.EmployeeManagement.repository.DepartmentRepository;
 import com.tlu.EmployeeManagement.repository.EmployeeRepository;
 import com.tlu.EmployeeManagement.repository.UserRepository;
 import com.tlu.EmployeeManagement.specification.EmployeeSpecification;
+import org.springframework.beans.factory.annotation.Value;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -31,11 +32,14 @@ import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class EmployeeService {
-    EmployeeRepository employeeRepository;
-    UserRepository userRepository;
-    DepartmentRepository departmentRepository;
+    final EmployeeRepository employeeRepository;
+    final UserRepository userRepository;
+    final DepartmentRepository departmentRepository;
+
+    @Value("${leave.annual.default-days}")
+    int defaultAnnualLeaveDays;
 
     public PagedResponse<EmployeeResponse> getEmployees(EmployeeFilterDto filterDto) {
         // Build specification for filtering
@@ -101,6 +105,7 @@ public class EmployeeService {
         employee.setHireDate(createDto.getHireDate());
         employee.setStatus(createDto.getStatus() != null ? createDto.getStatus() : EmployeeStatus.ACTIVE);
         employee.setRoleInDept(createDto.getRoleInDept() != null ? createDto.getRoleInDept() : RoleInDepartment.STAFF);
+        employee.setAnnualLeaveRemaining(defaultAnnualLeaveDays);
         employee.setIsDeleted(false);
 
         Employee savedEmployee = employeeRepository.save(employee);
@@ -187,6 +192,7 @@ public class EmployeeService {
             .dob(employee.getDob())
             .hireDate(employee.getHireDate())
             .roleInDept(employee.getRoleInDept() != null ? employee.getRoleInDept().name() : null)
+            .annualLeaveRemaining(employee.getAnnualLeaveRemaining())
             .status(employee.getStatus() != null ? employee.getStatus().name() : null)
             .username(username)
             .createdAt(employee.getCreatedAt())

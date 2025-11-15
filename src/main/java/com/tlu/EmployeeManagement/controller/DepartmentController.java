@@ -4,7 +4,14 @@ import com.tlu.EmployeeManagement.dto.request.DepartmentDto;
 import com.tlu.EmployeeManagement.dto.response.DepartmentResponse;
 import com.tlu.EmployeeManagement.service.DepartmentService;
 import com.tlu.EmployeeManagement.dto.response.ApiResponse;
+import com.tlu.EmployeeManagement.dto.response.DepartmentSummaryDto;
 
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
@@ -16,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Department", description = "APIs for managing departments")
 @RestController
 @RequestMapping("/departments")
 @RequiredArgsConstructor
@@ -24,19 +32,27 @@ public class DepartmentController {
 
     DepartmentService departmentService;
 
-    @GetMapping
-    public ApiResponse<List<DepartmentResponse>> getAllDepartments() {
-        List<DepartmentResponse> departments = departmentService.getAllDepartments();
-
-        return ApiResponse.<List<DepartmentResponse>>builder()
+    @Operation(
+        summary = "Get all departments",
+        description = "Retrieve a list of all departments"
+    )
+    @GetMapping()
+    public ApiResponse<List<DepartmentSummaryDto>> getDepartmentSummaries() {
+        List<DepartmentSummaryDto> summaries = departmentService.getDepartmentSummaries();
+        return ApiResponse.<List<DepartmentSummaryDto>>builder()
                 .status("success")
-                .message("Get all departments successfully")
-                .data(departments)
+                .message("Get department summaries successfully")
+                .data(summaries)
                 .build();
     }
 
+    @Operation(
+        summary = "Get department by ID",
+        description = "Retrieve a single department by its ID"
+    )
     @GetMapping("/{id}")
-    public ApiResponse<DepartmentResponse> getDepartmentById(@PathVariable Integer id) {
+    public ApiResponse<DepartmentResponse> getDepartmentById(
+            @Parameter(description = "Department ID", required = true, example = "1") @PathVariable Integer id) {
         DepartmentResponse department = departmentService.getDepartmentById(id);
 
         return ApiResponse.<DepartmentResponse>builder()
@@ -46,10 +62,20 @@ public class DepartmentController {
                 .build();
     }
 
-   
+
+    @Operation(
+        summary = "Create department",
+        description = "Create a new department"
+    )
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<DepartmentResponse> createDepartment(@Valid @RequestBody DepartmentDto createDto) {
+    public ApiResponse<DepartmentResponse> createDepartment(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "Department creation data",
+                required = true,
+                content = @Content(schema = @Schema(implementation = DepartmentDto.class))
+            )
+            @Valid @RequestBody DepartmentDto createDto) {
         DepartmentResponse department = departmentService.createDepartment(createDto);
 
         return ApiResponse.<DepartmentResponse>builder()
@@ -59,9 +85,18 @@ public class DepartmentController {
                 .build();
     }
 
+    @Operation(
+        summary = "Update department",
+        description = "Update an existing department"
+    )
     @PutMapping("/{id}")
     public ApiResponse<DepartmentResponse> updateDepartment(
-            @PathVariable Integer id,
+            @Parameter(description = "Department ID", required = true, example = "1") @PathVariable Integer id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "Department update data",
+                required = true,
+                content = @Content(schema = @Schema(implementation = DepartmentDto.class))
+            )
             @Valid @RequestBody DepartmentDto updateDto) {
 
         DepartmentResponse department = departmentService.updateDepartment(id, updateDto);
@@ -74,8 +109,13 @@ public class DepartmentController {
     }
 
 
+    @Operation(
+        summary = "Delete department",
+        description = "Delete a department"
+    )
     @DeleteMapping("/{id}")
-    public ApiResponse<Void> deleteDepartment(@PathVariable Integer id) {
+    public ApiResponse<Void> deleteDepartment(
+            @Parameter(description = "Department ID", required = true, example = "1") @PathVariable Integer id) {
         departmentService.deleteDepartment(id);
 
         return ApiResponse.<Void>builder()
