@@ -23,8 +23,6 @@ public class UserFilterDto {
 
     UserStatus status;
 
-    String country;
-
     Integer deptId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
@@ -40,7 +38,6 @@ public class UserFilterDto {
         private Integer page = 0;
         private Integer pageSize = 10;
         private UserStatus status;
-        private String country;
         private Integer deptId;
         private LocalDate dob;
         private String search;
@@ -57,11 +54,6 @@ public class UserFilterDto {
 
         public Builder status(UserStatus status) {
             this.status = status;
-            return this;
-        }
-
-        public Builder country(String country) {
-            this.country = country;
             return this;
         }
 
@@ -85,7 +77,6 @@ public class UserFilterDto {
             dto.page = this.page;
             dto.pageSize = this.pageSize;
             dto.status = this.status;
-            dto.country = this.country;
             dto.deptId = this.deptId;
             dto.dob = this.dob;
             dto.search = this.search;

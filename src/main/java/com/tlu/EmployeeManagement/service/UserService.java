@@ -39,9 +39,8 @@ public class UserService {
         // Build specification for filtering
         Specification<User> spec = UserSpecification.filterUser(
         filterDto.getStatus(),
-        filterDto.getCountry(),
         filterDto.getDeptId(),
-        filterDto.getSearch()  // nếu muốn filter qua department
+        filterDto.getSearch()
     );
 
         // Create pageable with sorting by createdAt descending

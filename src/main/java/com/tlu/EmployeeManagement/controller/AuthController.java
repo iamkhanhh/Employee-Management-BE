@@ -102,6 +102,15 @@ public class AuthController {
         return apiResponse;
     }
 
+    @Operation(
+        summary = "Get current user",
+        description = "Get the current authenticated user's information from the JWT token in the cookie"
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "200",
+        description = "User information retrieved successfully",
+        content = @Content(schema = @Schema(implementation = UserResponse.class))
+    )
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getUserById(HttpServletRequest request) {
         UserResponse userResponse = userService.getUserInfo(request);
@@ -167,8 +176,23 @@ public class AuthController {
     //     }
     // }
 
+    @Operation(
+        summary = "Forgot password",
+        description = "Reset user password by providing email and new password"
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "200",
+        description = "Password changed successfully",
+        content = @Content(schema = @Schema(implementation = ApiResponse.class))
+    )
     @PostMapping("/forgot_password")
-    public ApiResponse<Void> forgotPassword(@RequestBody ForgotPasswordDto input) {
+    public ApiResponse<Void> forgotPassword(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "Forgot password request (email and new password)",
+                required = true,
+                content = @Content(schema = @Schema(implementation = ForgotPasswordDto.class))
+            )
+            @RequestBody ForgotPasswordDto input) {
         try {
             authService.forgotPassword(input);
 
