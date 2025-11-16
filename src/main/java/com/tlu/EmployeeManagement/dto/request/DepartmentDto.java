@@ -1,5 +1,6 @@
 package com.tlu.EmployeeManagement.dto.request;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,6 @@ public class DepartmentDto {
 
     public static class Builder {
         private String deptName;
-
         public Builder deptName(String deptName) {
             this.deptName = deptName;
             return this;
@@ -33,4 +33,5 @@ public class DepartmentDto {
             return dto;
         }
     }
+    
 }

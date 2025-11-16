@@ -40,5 +40,8 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Inte
         @Param("endDate") LocalDate endDate
     );
 
+    @Query("SELECT COUNT(lr) FROM LeaveRequest lr WHERE lr.empId = :empId AND lr.leaveType = :type AND FUNCTION('YEAR', lr.createdAt) = :year")
+    long countByEmpIdAndLeaveTypeAndYear(@Param("empId") Integer empId, @Param("type") LeaveType type, @Param("year") int year);
+
     void deleteById(Integer id);
 }

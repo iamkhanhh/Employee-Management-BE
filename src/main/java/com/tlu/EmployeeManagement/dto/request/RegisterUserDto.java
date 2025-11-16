@@ -26,8 +26,6 @@ public class RegisterUserDto {
     @Email()
     String email;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-    LocalDate dob;
 
     public static Builder builder() {
         return new Builder();
@@ -37,7 +35,6 @@ public class RegisterUserDto {
         private String username;
         private String password;
         private String email;
-        private LocalDate dob;
 
         public Builder username(String username) {
             this.username = username;
@@ -54,17 +51,12 @@ public class RegisterUserDto {
             return this;
         }
 
-        public Builder dob(LocalDate dob) {
-            this.dob = dob;
-            return this;
-        }
 
         public RegisterUserDto build() {
             RegisterUserDto dto = new RegisterUserDto();
             dto.username = this.username;
             dto.password = this.password;
             dto.email = this.email;
-            dto.dob = this.dob;
             return dto;
         }
     }
