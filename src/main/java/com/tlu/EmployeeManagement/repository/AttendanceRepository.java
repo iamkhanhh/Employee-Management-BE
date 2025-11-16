@@ -34,5 +34,19 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Integer>
     @Query("SELECT a FROM Attendance a WHERE a.empId = :empId AND a.checkOut IS NULL")
     Optional<Attendance> findActiveAttendance(@Param("empId") Integer empId);
 
+    @Query("SELECT a FROM Attendance a WHERE a.empId = :empId AND a.checkIn BETWEEN :startDate AND :endDate")
+    Optional<Attendance> findAttendanceForToday(
+        @Param("empId") Integer empId,
+        @Param("startDate") LocalDateTime startDate,
+        @Param("endDate") LocalDateTime endDate
+    );
+
+    @Query("SELECT a FROM Attendance a WHERE a.empId IN :empIds AND a.checkIn BETWEEN :startDate AND :endDate")
+    List<Attendance> findByEmpIdsAndDateRange(
+        @Param("empIds") List<Integer> empIds,
+        @Param("startDate") LocalDateTime startDate,
+        @Param("endDate") LocalDateTime endDate
+    );
+
     void deleteById(Integer id);
 }

@@ -85,6 +85,17 @@ public class EmployeeService {
         return toEmployeeResponse(employee);
     }
 
+    public EmployeeResponse getEmployeeByUserId(Integer userId) {
+        Employee employee = employeeRepository.findByUserId(userId)
+            .orElseThrow(() -> new RuntimeException("Employee not found with userId: " + userId));
+
+        if (employee.getIsDeleted()) {
+            throw new RuntimeException("Employee has been deleted");
+        }
+
+        return toEmployeeResponse(employee);
+    }
+
     public EmployeeResponse createEmployee(EmployeeCreateDto createDto) {
         // Validate user exists
         userRepository.findById(createDto.getUserId())
