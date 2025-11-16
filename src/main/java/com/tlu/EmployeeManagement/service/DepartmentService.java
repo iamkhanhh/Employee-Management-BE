@@ -34,20 +34,10 @@ public class DepartmentService {
         departmentRepository.findByDeptName(createDto.getDeptName())
             .ifPresent(d -> { throw new RuntimeException("Department name already exists"); });
 
-        if (departmentRepository.existsByEmployeeId(createDto.getEmployeeId())) {
-            throw new RuntimeException("Employee is already assigned to a department");
-        }
-
         Department department = new Department();
         department.setDeptName(createDto.getDeptName());
-        department.setEmployeeId(createDto.getEmployeeId());
         department.setIsDeleted(false);
 
-    
-        employeeRepository.findById(createDto.getEmployeeId()).ifPresent(emp -> {
-            emp.setRoleInDept(emp.getRoleInDept());
-            employeeRepository.save(emp);
-        });
 
         Department saved = departmentRepository.save(department);
         return toDepartmentResponse(saved);
@@ -66,31 +56,7 @@ public class DepartmentService {
             .filter(d -> !d.getId().equals(id))
             .ifPresent(d -> { throw new RuntimeException("Department name already exists"); });
 
-        if (departmentRepository.existsByEmployeeId(updateDto.getEmployeeId())) {
-            throw new RuntimeException("Employee is already assigned to a department");
-        }
-
-        Integer oldEmployeeId = department.getEmployeeId();
-
-        department.setDeptName(updateDto.getDeptName());
-        department.setEmployeeId(updateDto.getEmployeeId());
-
-        // Nếu đổi trưởng phòng, cập nhật role
-        if (!oldEmployeeId.equals(updateDto.getEmployeeId())) {
-
-            // Employee cũ → STAFF
-            employeeRepository.findById(oldEmployeeId).ifPresent(emp -> {
-                emp.setRoleInDept(RoleInDepartment.STAFF);
-                employeeRepository.save(emp);
-            });
-
-            // Employee mới → HEAD
-            employeeRepository.findById(updateDto.getEmployeeId()).ifPresent(emp -> {
-                emp.setRoleInDept(RoleInDepartment.HEAD);
-                employeeRepository.save(emp);
-            });
-        }
-
+    department.setDeptName(updateDto.getDeptName());
         Department updated = departmentRepository.save(department);
         return toDepartmentResponse(updated);
     }
@@ -121,11 +87,8 @@ public class DepartmentService {
                 .map(dept -> {
                     Long count = employeeRepository.countByDeptId(dept.getId());
                     String managerName = null;
-                    if (dept.getEmployeeId() != null) {
-                        managerName = employeeRepository.findById(dept.getEmployeeId())
-                                .map(Employee::getFullName)
-                                .orElse(null);
-                    }
+                    var headOpt = employeeRepository.findFirstByDeptIdAndRoleInDept(dept.getId(), RoleInDepartment.HEAD);
+                    if (headOpt.isPresent()) managerName = headOpt.get().getFullName();
                     return new DepartmentSummaryDto(dept.getId(), dept.getDeptName(), managerName, count);
                 })
                 .collect(Collectors.toList());
@@ -135,7 +98,6 @@ public class DepartmentService {
         return DepartmentResponse.builder()
                 .id(department.getId())
                 .deptName(department.getDeptName())
-                .employeeId(department.getEmployeeId())
                 .createdAt(department.getCreatedAt())
                 .build();
     }

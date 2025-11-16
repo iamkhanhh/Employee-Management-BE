@@ -36,7 +36,6 @@ public class EmployeeResponse {
 
     String username;
 
-    Integer annualLeaveRemaining;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     LocalDateTime createdAt;
