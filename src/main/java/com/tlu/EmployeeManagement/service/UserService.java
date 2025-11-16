@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import jakarta.servlet.http.HttpServletRequest;
 
+
 import com.tlu.EmployeeManagement.specification.UserSpecification;
 import com.tlu.EmployeeManagement.dto.request.RegisterUserDto;
 import com.tlu.EmployeeManagement.dto.request.UserFilterDto;
@@ -19,6 +20,7 @@ import com.tlu.EmployeeManagement.dto.request.UserUpdateDto;
 import com.tlu.EmployeeManagement.dto.response.PagedResponse;
 import com.tlu.EmployeeManagement.dto.response.UserResponse;
 import com.tlu.EmployeeManagement.entity.User;
+import com.tlu.EmployeeManagement.enums.UserRole;
 import com.tlu.EmployeeManagement.enums.UserStatus;
 import com.tlu.EmployeeManagement.repository.UserRepository;
 
@@ -90,7 +92,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setStatus(UserStatus.ACTIVE);
         user.setEmail(dto.getEmail());
-        user.setRole("USER");
+        user.setRole(UserRole.USER);
 
 
         User saved = userRepository.save(user);

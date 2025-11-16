@@ -105,7 +105,7 @@ public class EmployeeService {
         employee.setHireDate(createDto.getHireDate());
         employee.setStatus(createDto.getStatus() != null ? createDto.getStatus() : EmployeeStatus.ACTIVE);
         employee.setRoleInDept(createDto.getRoleInDept() != null ? createDto.getRoleInDept() : RoleInDepartment.STAFF);
-        employee.setAnnualLeaveRemaining(defaultAnnualLeaveDays);
+    // annual leave is derived from leave requests per year; no stored balance
         employee.setIsDeleted(false);
 
         Employee savedEmployee = employeeRepository.save(employee);
@@ -192,7 +192,6 @@ public class EmployeeService {
             .dob(employee.getDob())
             .hireDate(employee.getHireDate())
             .roleInDept(employee.getRoleInDept() != null ? employee.getRoleInDept().name() : null)
-            .annualLeaveRemaining(employee.getAnnualLeaveRemaining())
             .status(employee.getStatus() != null ? employee.getStatus().name() : null)
             .username(username)
             .createdAt(employee.getCreatedAt())

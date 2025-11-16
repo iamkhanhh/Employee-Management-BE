@@ -57,6 +57,7 @@ public class Employee extends AbtractEntity {
     @Column(name = "role_in_dept", length = 20)
     private RoleInDepartment roleInDept = RoleInDepartment.STAFF;
 
+
     public static Builder builder() {
         return new Builder();
     }
