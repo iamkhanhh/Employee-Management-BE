@@ -1,0 +1,21 @@
+package com.tlu.EmployeeManagement.configuration;
+
+import java.util.TimeZone;
+
+import jakarta.annotation.PostConstruct;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+@Configuration
+public class TimezoneConfig {
+
+    @PostConstruct
+    public void init() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+    }
+}
+
