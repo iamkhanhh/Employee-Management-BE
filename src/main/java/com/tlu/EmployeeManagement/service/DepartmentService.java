@@ -89,7 +89,7 @@ public class DepartmentService {
                     String managerName = null;
                     var headOpt = employeeRepository.findFirstByDeptIdAndRoleInDept(dept.getId(), RoleInDepartment.HEAD);
                     if (headOpt.isPresent()) managerName = headOpt.get().getFullName();
-                    return new DepartmentSummaryDto(dept.getId(), dept.getDeptName(), managerName, count);
+                    return new DepartmentSummaryDto(dept.getId(), dept.getDeptName(), managerName, count, dept.getCreatedAt());
                 })
                 .collect(Collectors.toList());
     }
