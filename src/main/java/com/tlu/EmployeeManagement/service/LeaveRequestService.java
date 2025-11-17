@@ -19,7 +19,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
+import com.tlu.EmployeeManagement.dto.request.LeaveRequestUpdateDto;
+import com.tlu.EmployeeManagement.dto.response.LeaveRequestWithEmployeeDto;
+import com.tlu.EmployeeManagement.enums.RoleInDepartment;
+import java.util.ArrayList;
+import java.util.List;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -33,6 +37,7 @@ public class LeaveRequestService {
     final DepartmentRepository departmentRepository;
     final LeaveTypeHandlerFactory handlerFactory;
 
+
     @Value("${leave.annual.default-days}")
     int defaultAnnualLeaveDays;
 
@@ -42,6 +47,106 @@ public class LeaveRequestService {
     LeaveRequest lr = handler.handle(requestDto);
     lr.setStatus(LeaveStatus.PENDING);
     return leaveRequestRepository.save(lr);
+    }
+
+  
+    public List<LeaveRequestWithEmployeeDto> listByDepartment(Integer deptId) {
+        Integer currentUserId = SecurityUtils.getCurrentUserId();
+        if (currentUserId == null) throw new RuntimeException("Unauthenticated");
+
+        Employee currentEmp = employeeRepository.findByUserId(currentUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Current employee not found"));
+
+        if (currentEmp.getDeptId() == null || !currentEmp.getDeptId().equals(deptId)) {
+            throw new RuntimeException("Forbidden: not head of this department");
+        }
+
+        if (currentEmp.getRoleInDept() != RoleInDepartment.HEAD) {
+            throw new RuntimeException("Forbidden: only department head can access");
+        }
+
+        var leaves = leaveRequestRepository.findByDepartmentId(deptId);
+        List<LeaveRequestWithEmployeeDto> dtoList = new ArrayList<>();
+        for (LeaveRequest lr : leaves) {
+            LeaveRequestWithEmployeeDto dto = new LeaveRequestWithEmployeeDto();
+            dto.setId(lr.getId());
+            dto.setEmpId(lr.getEmpId());
+            dto.setEmployeeName(employeeRepository.findById(lr.getEmpId()).map(Employee::getFullName).orElse(null));
+            dto.setLeaveType(lr.getLeaveType());
+            dto.setStartDate(lr.getStartDate());
+            dto.setEndDate(lr.getEndDate());
+            dto.setReason(lr.getReason());
+            dto.setStatus(lr.getStatus());
+            dto.setCreatedAt(lr.getCreatedAt());
+            dtoList.add(dto);
+        }
+        return dtoList;
+    }
+
+    // 2) Update own leave
+    @Transactional
+    public LeaveRequest updateLeaveRequest(Integer id, LeaveRequestUpdateDto updateDto) {
+        Integer currentUserId = SecurityUtils.getCurrentUserId();
+        if (currentUserId == null) throw new RuntimeException("Unauthenticated");
+
+        Employee currentEmp = employeeRepository.findByUserId(currentUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Current employee not found"));
+
+        LeaveRequest lr = leaveRequestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Leave request not found"));
+
+        if (!lr.getEmpId().equals(currentEmp.getId())) {
+            throw new RuntimeException("Forbidden: only owner can update");
+        }
+
+        if (lr.getStatus() == LeaveStatus.APPROVED || lr.getStatus() == LeaveStatus.REJECTED) {
+            throw new RuntimeException("Cannot update an approved or rejected request");
+        }
+
+        // validate dates
+        if (updateDto.getStartDate().isAfter(updateDto.getEndDate())) {
+            throw new IllegalArgumentException("startDate must be before or equal endDate");
+        }
+
+        lr.setLeaveType(updateDto.getLeaveType());
+        lr.setStartDate(updateDto.getStartDate());
+        lr.setEndDate(updateDto.getEndDate());
+        lr.setReason(updateDto.getReason());
+
+        return leaveRequestRepository.save(lr);
+    }
+
+    @Transactional
+    public void deleteLeaveRequest(Integer id) {
+        Integer currentUserId = SecurityUtils.getCurrentUserId();
+        if (currentUserId == null) throw new RuntimeException("Unauthenticated");
+
+        Employee currentEmp = employeeRepository.findByUserId(currentUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Current employee not found"));
+
+        LeaveRequest lr = leaveRequestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Leave request not found"));
+
+        if (!lr.getEmpId().equals(currentEmp.getId())) {
+            throw new RuntimeException("Forbidden: only owner can delete");
+        }
+
+        if (lr.getStatus() == LeaveStatus.APPROVED || lr.getStatus() == LeaveStatus.REJECTED) {
+            throw new RuntimeException("Cannot delete an approved or rejected request");
+        }
+
+        leaveRequestRepository.deleteById(id);
+    }
+
+    // 3) list my requests with optional filters
+    public java.util.List<LeaveRequest> listMyRequests(LeaveStatus status, LocalDate startDate, LocalDate endDate) {
+        Integer currentUserId = SecurityUtils.getCurrentUserId();
+        if (currentUserId == null) throw new RuntimeException("Unauthenticated");
+
+        Employee currentEmp = employeeRepository.findByUserId(currentUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Current employee not found"));
+
+        return leaveRequestRepository.findByEmpIdWithFilters(currentEmp.getId(), status, startDate, endDate);
     }
 
     @Transactional
