@@ -8,8 +8,6 @@ import com.tlu.EmployeeManagement.enums.LeaveType;
 
 @Data
 public class LeaveRequestUpdateDto {
-    @NotNull
-    private Integer empId;
 
     @NotNull
     private LeaveType leaveType;

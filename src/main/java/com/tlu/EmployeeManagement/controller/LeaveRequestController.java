@@ -104,7 +104,7 @@ public class LeaveRequestController {
     }
 
     @GetMapping("/my")
-    public ApiResponse<java.util.List<LeaveRequest>> myRequests(
+    public ApiResponse<List<LeaveRequest>> myRequests(
             @RequestParam(required = false) LeaveStatus status,
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate

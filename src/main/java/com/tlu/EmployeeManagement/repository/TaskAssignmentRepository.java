@@ -19,11 +19,16 @@ public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, 
 
     List<TaskAssignment> findByEmpId(Integer empId);
 
+    Optional<TaskAssignment> findByTaskIdAndEmpId(Integer taskId, Integer empId);
+
     @Query("SELECT ta FROM TaskAssignment ta WHERE ta.empId = :empId AND ta.isDeleted = false")
     List<TaskAssignment> findActiveAssignmentsByEmpId(@Param("empId") Integer empId);
 
     @Query("SELECT ta FROM TaskAssignment ta WHERE ta.taskId = :taskId AND ta.isDeleted = false")
     List<TaskAssignment> findActiveAssignmentsByTaskId(@Param("taskId") Integer taskId);
+
+    @Query("SELECT COUNT(ta) FROM TaskAssignment ta WHERE ta.taskId = :taskId AND ta.completedDate IS NOT NULL")
+    long countCompletedByTaskId(@Param("taskId") Integer taskId);
 
     @Query("SELECT ta FROM TaskAssignment ta WHERE ta.empId = :empId AND ta.completedDate IS NULL")
     List<TaskAssignment> findPendingAssignmentsByEmpId(@Param("empId") Integer empId);

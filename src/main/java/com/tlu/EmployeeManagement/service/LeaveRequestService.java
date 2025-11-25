@@ -43,10 +43,10 @@ public class LeaveRequestService {
 
     @Transactional
     public LeaveRequest createLeaveRequest(LeaveRequestCreateDto requestDto) {
-    var handler = handlerFactory.getHandler(requestDto.getLeaveType());
-    LeaveRequest lr = handler.handle(requestDto);
-    lr.setStatus(LeaveStatus.PENDING);
-    return leaveRequestRepository.save(lr);
+        var handler = handlerFactory.getHandler(requestDto.getLeaveType());
+        LeaveRequest lr = handler.handle(requestDto);
+        lr.setStatus(LeaveStatus.PENDING);
+        return leaveRequestRepository.save(lr);
     }
 
   
@@ -139,7 +139,7 @@ public class LeaveRequestService {
     }
 
     // 3) list my requests with optional filters
-    public java.util.List<LeaveRequest> listMyRequests(LeaveStatus status, LocalDate startDate, LocalDate endDate) {
+    public List<LeaveRequest> listMyRequests(LeaveStatus status, LocalDate startDate, LocalDate endDate) {
         Integer currentUserId = SecurityUtils.getCurrentUserId();
         if (currentUserId == null) throw new RuntimeException("Unauthenticated");
 
@@ -208,6 +208,44 @@ public class LeaveRequestService {
         return leaveRequestRepository.save(leaveRequest);
     }
 
+    @Transactional
+    public LeaveRequest undoApproveLeaveRequest(Integer leaveId) {
+        LeaveRequest leaveRequest = leaveRequestRepository.findById(leaveId)
+                .orElseThrow(() -> new ResourceNotFoundException("Leave request not found with id: " + leaveId));
+
+        // Only allow undo if currently approved
+        if (leaveRequest.getStatus() != LeaveStatus.APPROVED) {
+            throw new IllegalStateException("Can only undo an approved request");
+        }
+
+        // Reset approval fields
+        leaveRequest.setStatus(LeaveStatus.PENDING);
+        leaveRequest.setApprovedBy(null);
+        leaveRequest.setApprovedDate(null);
+        leaveRequest.setRejectReason(null);
+
+        return leaveRequestRepository.save(leaveRequest);
+    }
+
+    @Transactional
+    public LeaveRequest undoRejectLeaveRequest(Integer leaveId) {
+        LeaveRequest leaveRequest = leaveRequestRepository.findById(leaveId)
+                .orElseThrow(() -> new ResourceNotFoundException("Leave request not found with id: " + leaveId));
+
+        // Only allow undo if currently rejected
+        if (leaveRequest.getStatus() != LeaveStatus.REJECTED) {
+            throw new IllegalStateException("Can only undo a rejected request");
+        }
+
+        // Reset rejection fields
+        leaveRequest.setStatus(LeaveStatus.PENDING);
+        leaveRequest.setApprovedBy(null);
+        leaveRequest.setApprovedDate(null);
+        leaveRequest.setRejectReason(null);
+
+        return leaveRequestRepository.save(leaveRequest);
+    }
+
     private void checkApproverPermission(LeaveRequest request, Integer approverEmpId) {
         if (approverEmpId == null) throw new RuntimeException("Approver id required");
 
@@ -217,7 +255,7 @@ public class LeaveRequestService {
         Department dept = departmentRepository.findById(emp.getDeptId())
                 .orElseThrow(() -> new RuntimeException("Department not found"));
 
-        var headOpt = employeeRepository.findFirstByDeptIdAndRoleInDept(dept.getId(), com.tlu.EmployeeManagement.enums.RoleInDepartment.HEAD);
+        var headOpt = employeeRepository.findFirstByDeptIdAndRoleInDept(dept.getId(), RoleInDepartment.HEAD);
         if (headOpt.isPresent() && headOpt.get().getId().equals(approverEmpId)) {
             return;
         }
