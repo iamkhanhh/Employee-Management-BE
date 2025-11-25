@@ -14,4 +14,10 @@ public class LeaveRequestInvoker {
     public List<Command> getHistory() {
         return history;
     }
+
+    public void undoLast() throws Exception {
+        if (history.isEmpty()) return;
+        Command last = history.remove(history.size() - 1);
+        last.undo();
+    }
 }

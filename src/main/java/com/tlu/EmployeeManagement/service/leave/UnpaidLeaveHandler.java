@@ -10,18 +10,14 @@ import com.tlu.EmployeeManagement.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.temporal.ChronoUnit;
-
 
 @Component
 @RequiredArgsConstructor
-public class MaternityLeaveHandler implements LeaveTypeHandler {
+public class UnpaidLeaveHandler implements LeaveTypeHandler {
     private final EmployeeRepository employeeRepository;
-    private static final int MIN_DAYS = 90;
-
     @Override
     public LeaveType getType() {
-        return LeaveType.MATERNITY_LEAVE;
+        return LeaveType.UNPAID_LEAVE;
     }
 
     @Override
@@ -31,11 +27,7 @@ public class MaternityLeaveHandler implements LeaveTypeHandler {
     Employee emp = employeeRepository.findByUserId(currentUserId)
         .orElseThrow(() -> new ResourceNotFoundException("Employee not found for current user"));
 
-    int days = (int) ChronoUnit.DAYS.between(dto.getStartDate(), dto.getEndDate()) + 1;
-        if (days < MIN_DAYS) {
-            throw new IllegalArgumentException("Maternity leave must be at least " + MIN_DAYS + " days");
-        }
-        LeaveRequest lr = new LeaveRequest();
+    LeaveRequest lr = new LeaveRequest();
     lr.setEmpId(emp.getId());
         lr.setLeaveType(dto.getLeaveType());
         lr.setStartDate(dto.getStartDate());

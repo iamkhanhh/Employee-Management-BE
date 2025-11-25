@@ -16,4 +16,10 @@ public class ApproveLeaveCommand implements Command {
     public void execute() throws Exception {
         service.approveLeaveRequest(leaveId);
     }
+
+    @Override
+    public void undo() throws Exception {
+        // revert the approval
+        service.undoApproveLeaveRequest(leaveId);
+    }
 }

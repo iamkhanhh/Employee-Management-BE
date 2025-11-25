@@ -17,4 +17,9 @@ public class RejectLeaveCommand implements Command {
     public void execute() throws Exception {
         service.rejectLeaveRequest(leaveId, rejectReason);
     }
+
+    @Override
+    public void undo() throws Exception {
+        service.undoRejectLeaveRequest(leaveId);
+    }
 }

@@ -27,6 +27,22 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Inte
 
     List<LeaveRequest> findByLeaveType(LeaveType leaveType);
 
+    // Find all leave requests for employees in a department
+    @Query("SELECT lr FROM LeaveRequest lr JOIN com.tlu.EmployeeManagement.entity.Employee e ON lr.empId = e.id WHERE e.deptId = :deptId")
+    List<LeaveRequest> findByDepartmentId(@Param("deptId") Integer deptId);
+
+    // Filter leave requests for an employee by optional status and date range
+    @Query("SELECT lr FROM LeaveRequest lr WHERE lr.empId = :empId " +
+           "AND (:status IS NULL OR lr.status = :status) " +
+           "AND (:startDate IS NULL OR lr.endDate >= :startDate) " +
+           "AND (:endDate IS NULL OR lr.startDate <= :endDate)")
+    List<LeaveRequest> findByEmpIdWithFilters(
+        @Param("empId") Integer empId,
+        @Param("status") LeaveStatus status,
+        @Param("startDate") LocalDate startDate,
+        @Param("endDate") LocalDate endDate
+    );
+
     @Query("SELECT lr FROM LeaveRequest lr WHERE lr.startDate <= :endDate AND lr.endDate >= :startDate")
     List<LeaveRequest> findLeaveRequestsByDateRange(
         @Param("startDate") LocalDate startDate,
