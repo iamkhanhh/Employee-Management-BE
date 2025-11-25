@@ -33,5 +33,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
         @Param("endDate") LocalDate endDate
     );
 
+    
+
     void deleteById(Integer id);
 }

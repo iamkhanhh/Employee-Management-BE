@@ -20,9 +20,6 @@ import com.tlu.EmployeeManagement.enums.LeaveType;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LeaveRequestCreateDto {
 
-    @NotNull(message = "Employee ID cannot be null")
-    Integer empId;
-
     @NotNull(message = "Leave type cannot be null")
     LeaveType leaveType;
 
