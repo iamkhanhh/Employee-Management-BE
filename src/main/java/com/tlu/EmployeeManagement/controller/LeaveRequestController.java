@@ -164,8 +164,10 @@ public class LeaveRequestController {
                 .build();
     }
 
+    @Operation(summary = "Get leave requests by department", description = "Retrieve all leave requests for a specific department")
     @GetMapping("/department/{deptId}")
-    public ApiResponse<List<LeaveRequestWithEmployeeDto>> listByDepartment(@PathVariable Integer deptId) {
+    public ApiResponse<List<LeaveRequestWithEmployeeDto>> listByDepartment(
+            @Parameter(description = "Department ID", required = true, example = "1") @PathVariable Integer deptId) {
         var list = leaveRequestService.listByDepartment(deptId);
         return ApiResponse.<List<LeaveRequestWithEmployeeDto>>builder()
                 .code(200)
@@ -174,23 +176,30 @@ public class LeaveRequestController {
                 .build();
     }
 
+    @Operation(summary = "Update leave request", description = "Update an existing leave request. Only pending requests can be updated.")
     @PutMapping("/{id}")
-    public ApiResponse<LeaveRequest> update(@PathVariable Integer id, @Valid @RequestBody LeaveRequestUpdateDto dto) {
+    public ApiResponse<LeaveRequest> update(
+            @Parameter(description = "Leave request ID", required = true, example = "1") @PathVariable Integer id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Leave request update data", required = true)
+            @Valid @RequestBody LeaveRequestUpdateDto dto) {
         LeaveRequest updated = leaveRequestService.updateLeaveRequest(id, dto);
         return ApiResponse.<LeaveRequest>builder().code(200).status("success").data(updated).build();
     }
 
+    @Operation(summary = "Delete leave request", description = "Soft delete a leave request (sets isDeleted = true)")
     @DeleteMapping("/{id}")
-    public ApiResponse<?> delete(@PathVariable Integer id) {
+    public ApiResponse<?> delete(
+            @Parameter(description = "Leave request ID", required = true, example = "1") @PathVariable Integer id) {
         leaveRequestService.deleteLeaveRequest(id);
         return ApiResponse.builder().code(204).status("success").message("Deleted").build();
     }
 
+    @Operation(summary = "Get current user's leave requests", description = "Retrieve all leave requests for the currently authenticated user with optional filtering")
     @GetMapping("/my")
     public ApiResponse<List<LeaveRequest>> myRequests(
-            @RequestParam(required = false) LeaveStatus status,
-            @RequestParam(required = false) LocalDate startDate,
-            @RequestParam(required = false) LocalDate endDate
+            @Parameter(description = "Filter by leave status") @RequestParam(required = false) LeaveStatus status,
+            @Parameter(description = "Filter by start date (format: dd/MM/yyyy)", example = "01/01/2024") @RequestParam(required = false) LocalDate startDate,
+            @Parameter(description = "Filter by end date (format: dd/MM/yyyy)", example = "31/12/2024") @RequestParam(required = false) LocalDate endDate
     ) {
         var list = leaveRequestService.listMyRequests(status, startDate, endDate);
         return ApiResponse.<List<LeaveRequest>>builder().code(200).status("success").data(list).build();

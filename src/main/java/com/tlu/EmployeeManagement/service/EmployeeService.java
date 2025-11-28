@@ -24,6 +24,7 @@ import com.tlu.EmployeeManagement.repository.DepartmentRepository;
 import com.tlu.EmployeeManagement.repository.EmployeeRepository;
 import com.tlu.EmployeeManagement.repository.UserRepository;
 import com.tlu.EmployeeManagement.specification.EmployeeSpecification;
+import com.tlu.EmployeeManagement.util.SecurityUtils;
 import org.springframework.beans.factory.annotation.Value;
 
 import lombok.AccessLevel;
@@ -169,6 +170,22 @@ public class EmployeeService {
         // Soft delete
         employee.setIsDeleted(true);
         employeeRepository.save(employee);
+    }
+
+    public EmployeeResponse getCurrentUserEmployee() {
+        Integer currentUserId = SecurityUtils.getCurrentUserId();
+        if (currentUserId == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        Employee employee = employeeRepository.findByUserId(currentUserId)
+            .orElseThrow(() -> new RuntimeException("Employee not found for current user"));
+
+        if (employee.getIsDeleted()) {
+            throw new RuntimeException("Employee has been deleted");
+        }
+
+        return toEmployeeResponse(employee);
     }
 
     public EmployeeResponse toEmployeeResponse(Employee employee) {
