@@ -26,9 +26,6 @@ public class KpiScore extends AbtractEntity {
     @Column(name = "score_value", precision = 5, scale = 2)
     private BigDecimal scoreValue;
 
-    @Column(name = "recorded_by")
-    private Integer recordedBy;
-
     public static Builder builder() {
         return new Builder();
     }
@@ -38,7 +35,6 @@ public class KpiScore extends AbtractEntity {
         private Integer kpiCriteriaId;
         private Integer kpiPeriodId;
         private BigDecimal scoreValue;
-        private Integer recordedBy;
 
         public Builder empId(Integer empId) {
             this.empId = empId;
@@ -60,18 +56,12 @@ public class KpiScore extends AbtractEntity {
             return this;
         }
 
-        public Builder recordedBy(Integer recordedBy) {
-            this.recordedBy = recordedBy;
-            return this;
-        }
-
         public KpiScore build() {
             KpiScore kpiScore = new KpiScore();
             kpiScore.empId = this.empId;
             kpiScore.kpiCriteriaId = this.kpiCriteriaId;
             kpiScore.kpiPeriodId = this.kpiPeriodId;
             kpiScore.scoreValue = this.scoreValue;
-            kpiScore.recordedBy = this.recordedBy;
             return kpiScore;
         }
     }
