@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.tlu.EmployeeManagement.enums.UserStatus;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,6 +27,7 @@ public class UserFilterDto {
     Integer deptId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @Schema(description = "Filter by date of birth", example = "01/01/1990", type = "string", pattern = "dd/MM/yyyy")
     LocalDate dob;
 
     String search;

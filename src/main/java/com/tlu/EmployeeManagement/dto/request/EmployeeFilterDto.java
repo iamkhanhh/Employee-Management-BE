@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.tlu.EmployeeManagement.enums.EmployeeStatus;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,6 +27,7 @@ public class EmployeeFilterDto {
     Integer deptId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @Schema(description = "Filter by hire date", example = "15/06/2023", type = "string", pattern = "dd/MM/yyyy")
     LocalDate hireDate;
 
     String search; // For searching in employee name

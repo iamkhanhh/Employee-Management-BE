@@ -6,6 +6,7 @@ import com.tlu.EmployeeManagement.enums.UserRole;
 import com.tlu.EmployeeManagement.enums.UserStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
 
 import lombok.Getter;
@@ -32,6 +33,7 @@ public class UserUpdateDto {
     private String profilePicImage;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @Schema(description = "Date of birth", example = "15/03/1985", type = "string", pattern = "dd/MM/yyyy")
     private LocalDate dob;
 
     private UserRole role;

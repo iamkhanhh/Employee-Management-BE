@@ -11,6 +11,7 @@ import com.tlu.EmployeeManagement.enums.UserStatus;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 
 @Data
@@ -35,9 +36,11 @@ public class UserResponse {
   UserStatus status;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+  @Schema(description = "Date of birth", example = "15/03/1985", type = "string", pattern = "dd/MM/yyyy")
   LocalDate dob;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+  @Schema(description = "Creation timestamp", example = "28/11/2025", type = "string", pattern = "dd/MM/yyyy")
   LocalDateTime createdAt;
 
   public static Builder builder() {
