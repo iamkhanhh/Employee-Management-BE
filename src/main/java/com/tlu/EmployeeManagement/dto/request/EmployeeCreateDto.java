@@ -23,6 +23,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EmployeeCreateDto {
+    @NotNull(message = "User ID is required")
+    Integer userId;
 
     @NotNull(message = "Department ID is required")
     Integer deptId;
@@ -57,6 +59,7 @@ public class EmployeeCreateDto {
     }
 
     public static class Builder {
+        private Integer userId;
         private Integer deptId;
         private String fullName;
         private Gender gender;
@@ -66,6 +69,11 @@ public class EmployeeCreateDto {
         private LocalDate hireDate;
         private EmployeeStatus status;
         private RoleInDepartment roleInDept;
+
+        public Builder userId(Integer userId) {
+            this.userId = userId;
+            return this;
+        }
 
         public Builder deptId(Integer deptId) {
             this.deptId = deptId;
@@ -114,6 +122,7 @@ public class EmployeeCreateDto {
 
         public EmployeeCreateDto build() {
             EmployeeCreateDto dto = new EmployeeCreateDto();
+            dto.userId = this.userId;
             dto.deptId = this.deptId;
             dto.fullName = this.fullName;
             dto.gender = this.gender;

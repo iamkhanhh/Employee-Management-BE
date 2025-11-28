@@ -98,11 +98,16 @@ public class EmployeeService {
     }
 
     public EmployeeResponse createEmployee(EmployeeCreateDto createDto) {
+        // Validate user exists
+        userRepository.findById(createDto.getUserId())
+            .orElseThrow(() -> new RuntimeException("User not found with id: " + createDto.getUserId()));
+
         // Validate department exists
         departmentRepository.findById(createDto.getDeptId())
             .orElseThrow(() -> new RuntimeException("Department not found with id: " + createDto.getDeptId()));
 
         Employee employee = new Employee();
+        employee.setUserId(createDto.getUserId());
         employee.setDeptId(createDto.getDeptId());
         employee.setFullName(createDto.getFullName());
         employee.setGender(createDto.getGender());
