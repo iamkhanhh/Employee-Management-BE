@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.tlu.EmployeeManagement.enums.ContractStatus;
 import com.tlu.EmployeeManagement.enums.ContractType;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,9 +30,11 @@ public class ContractFilterDto {
     Integer empId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @Schema(description = "Filter by start date", example = "01/01/2024", type = "string", pattern = "dd/MM/yyyy")
     LocalDate startDate;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @Schema(description = "Filter by end date", example = "31/12/2024", type = "string", pattern = "dd/MM/yyyy")
     LocalDate endDate;
 
     public static Builder builder() {

@@ -7,6 +7,7 @@ import com.tlu.EmployeeManagement.enums.EmployeeStatus;
 import com.tlu.EmployeeManagement.enums.Gender;
 import com.tlu.EmployeeManagement.enums.RoleInDepartment;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Pattern;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,7 @@ public class EmployeeUpdateDto {
     Gender gender;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @Schema(description = "Date of birth", example = "15/05/1990", type = "string", pattern = "dd/MM/yyyy")
     LocalDate dob;
 
     @Pattern(regexp = "^[0-9]{10,20}$", message = "Phone number must be between 10 and 20 digits")
@@ -36,6 +38,7 @@ public class EmployeeUpdateDto {
     String address;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @Schema(description = "Hire date", example = "10/06/2020", type = "string", pattern = "dd/MM/yyyy")
     LocalDate hireDate;
 
     EmployeeStatus status;
