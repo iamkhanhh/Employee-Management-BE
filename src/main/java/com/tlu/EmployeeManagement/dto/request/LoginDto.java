@@ -1,18 +1,39 @@
 package com.tlu.EmployeeManagement.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Data transfer object for user login authentication")
 public class LoginDto {
-  @Email()
+
+  @NotBlank(message = "Email is required")
+  @Email(message = "Email should be valid")
+  @Schema(
+    description = "User's email address for authentication",
+    example = "john.doe@example.com",
+    required = true
+  )
   String email;
 
+  @NotBlank(message = "Password is required")
   @Size(min = 8, message = "Password must be at least 8 characters")
+  @Schema(
+    description = "User's password (minimum 8 characters)",
+    example = "password123",
+    required = true,
+    minLength = 8
+  )
   String password;
 
   public static Builder builder() {
