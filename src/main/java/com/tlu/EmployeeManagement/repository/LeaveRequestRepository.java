@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import com.tlu.EmployeeManagement.entity.Employee;
 
 import com.tlu.EmployeeManagement.entity.LeaveRequest;
 import com.tlu.EmployeeManagement.enums.LeaveStatus;
@@ -60,4 +61,24 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Inte
     long countByEmpIdAndLeaveTypeAndYear(@Param("empId") Integer empId, @Param("type") LeaveType type, @Param("year") int year);
 
     void deleteById(Integer id);
+
+    @Query("""
+    SELECT COUNT(lr)
+    FROM LeaveRequest lr
+    JOIN Employee e ON lr.empId = e.id
+    WHERE e.deptId = :deptId
+  """)
+    long countByDept(@Param("deptId") Integer deptId);
+
+    @Query("""
+        SELECT COUNT(lr)
+        FROM LeaveRequest lr
+        JOIN Employee e ON lr.empId = e.id
+        WHERE e.deptId = :deptId AND lr.status = :status
+    """)
+    long countByDeptAndStatus(
+            @Param("deptId") Integer deptId,
+            @Param("status") LeaveStatus status
+    );
+
 }
