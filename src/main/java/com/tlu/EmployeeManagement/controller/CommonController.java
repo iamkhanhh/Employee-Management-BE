@@ -4,13 +4,16 @@ import java.util.Map;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.tlu.EmployeeManagement.dto.request.GetPresignedUrlForUploadDto;
 import com.tlu.EmployeeManagement.dto.response.ApiResponse;
+import com.tlu.EmployeeManagement.dto.response.DashboardResponse;
 import com.tlu.EmployeeManagement.dto.response.PresignedUrlResponse;
 import com.tlu.EmployeeManagement.enums.UploadFolderType;
+import com.tlu.EmployeeManagement.service.CommonService;
 import com.tlu.EmployeeManagement.service.S3Service;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,13 +25,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.AccessLevel;
 
-@Tag(name = "Common", description = "Common APIs for file upload and other utilities")
+@Tag(name = "Common", description = "Common APIs for file upload, dashboard statistics, and other utilities")
 @RestController
 @RequestMapping("")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CommonController {
     S3Service s3Service;
+    CommonService commonService;
 
     @Operation(
         summary = "Generate presigned URL for upload",
@@ -63,5 +67,21 @@ public class CommonController {
                                             .data(presignedUrlResponse)
                                             .build();
         return apiResponse;
+    }
+
+    @Operation(
+        summary = "Get admin dashboard statistics",
+        description = "Get comprehensive dashboard statistics including overview stats, personnel by department, contract type distribution, salary by department, and employee count trend over the last 12 months. This endpoint is designed for admin dashboard visualization."
+    )
+    @GetMapping("/dashboard")
+    public ApiResponse<DashboardResponse> getDashboard() {
+        DashboardResponse dashboardData = commonService.getDashboardStats();
+
+        return ApiResponse.<DashboardResponse>builder()
+                .code(200)
+                .status("success")
+                .message("Dashboard statistics retrieved successfully")
+                .data(dashboardData)
+                .build();
     }
 }

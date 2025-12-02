@@ -31,5 +31,8 @@ public interface ContractRepository extends JpaRepository<Contract, Integer>, Jp
     @Query("SELECT c FROM Contract c WHERE c.endDate < :date AND c.status = :status")
     List<Contract> findExpiringContracts(@Param("date") LocalDate date, @Param("status") ContractStatus status);
 
+    // Dashboard queries
+    List<Contract> findByIsDeletedAndStatus(boolean isDeleted, ContractStatus status);
+
     void deleteById(Integer id);
 }
