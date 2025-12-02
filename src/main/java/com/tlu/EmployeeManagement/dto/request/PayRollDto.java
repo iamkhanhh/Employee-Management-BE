@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 
 
@@ -13,13 +14,18 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Request body for creating a single employee payroll")
 public class PayRollDto {
+    @Schema(description = "Employee ID", example = "1", required = true)
     Integer empId;
-    
-    BigDecimal allowance; // tro cap
 
-    BigDecimal bonus; // thuong 
+    @Schema(description = "Allowance amount (tro cap)", example = "500000.00")
+    BigDecimal allowance;
 
-    BigDecimal deduction; // tru
+    @Schema(description = "Bonus amount (thuong)", example = "1000000.00")
+    BigDecimal bonus;
+
+    @Schema(description = "Deduction amount (tru)", example = "200000.00")
+    BigDecimal deduction;
 
 }
