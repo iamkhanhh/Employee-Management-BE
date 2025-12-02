@@ -18,6 +18,9 @@ public class Notification extends AbtractEntity {
     @Column(length = 500)
     private String content;
 
+    @Column(name = "dept_id")
+    private Integer deptId;
+
     @Column(name = "created_by")
     private Integer createdBy;
 
@@ -28,6 +31,7 @@ public class Notification extends AbtractEntity {
     public static class Builder {
         private String title;
         private String content;
+        private Integer deptId;
         private Integer createdBy;
 
         public Builder title(String title) {
@@ -40,6 +44,11 @@ public class Notification extends AbtractEntity {
             return this;
         }
 
+        public Builder deptId(Integer deptId) {
+            this.deptId = deptId;
+            return this;
+        }
+
         public Builder createdBy(Integer createdBy) {
             this.createdBy = createdBy;
             return this;
@@ -49,6 +58,7 @@ public class Notification extends AbtractEntity {
             Notification notification = new Notification();
             notification.title = this.title;
             notification.content = this.content;
+            notification.deptId = this.deptId;
             notification.createdBy = this.createdBy;
             return notification;
         }

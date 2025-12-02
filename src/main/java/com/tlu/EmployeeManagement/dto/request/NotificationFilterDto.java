@@ -1,10 +1,5 @@
 package com.tlu.EmployeeManagement.dto.request;
 
-import java.time.LocalDate;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.tlu.EmployeeManagement.enums.UserStatus;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -16,8 +11,8 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Schema(description = "Filter criteria for querying users with pagination")
-public class UserFilterDto {
+@Schema(description = "Filter criteria for querying notifications with pagination")
+public class NotificationFilterDto {
 
     @Schema(
         description = "Page number (zero-based)",
@@ -34,29 +29,14 @@ public class UserFilterDto {
     Integer pageSize = 10;
 
     @Schema(
-        description = "Filter by user status",
-        example = "ACTIVE"
-    )
-    UserStatus status;
-
-    @Schema(
-        description = "Filter by department ID",
+        description = "Filter notifications by department ID. Admin can view all departments, regular users can only view their own department",
         example = "1"
     )
     Integer deptId;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     @Schema(
-        description = "Filter by date of birth",
-        example = "01/01/1990",
-        type = "string",
-        pattern = "dd/MM/yyyy"
-    )
-    LocalDate dob;
-
-    @Schema(
-        description = "Search keyword to filter users by username, email, or full name (case-insensitive)",
-        example = "john"
+        description = "Search keyword to filter notifications by title or content (case-insensitive)",
+        example = "meeting"
     )
     String search;
 
@@ -67,9 +47,7 @@ public class UserFilterDto {
     public static class Builder {
         private Integer page = 0;
         private Integer pageSize = 10;
-        private UserStatus status;
         private Integer deptId;
-        private LocalDate dob;
         private String search;
 
         public Builder page(Integer page) {
@@ -82,18 +60,8 @@ public class UserFilterDto {
             return this;
         }
 
-        public Builder status(UserStatus status) {
-            this.status = status;
-            return this;
-        }
-
         public Builder deptId(Integer deptId) {
             this.deptId = deptId;
-            return this;
-        }
-
-        public Builder dob(LocalDate dob) {
-            this.dob = dob;
             return this;
         }
 
@@ -102,16 +70,13 @@ public class UserFilterDto {
             return this;
         }
 
-        public UserFilterDto build() {
-            UserFilterDto dto = new UserFilterDto();
+        public NotificationFilterDto build() {
+            NotificationFilterDto dto = new NotificationFilterDto();
             dto.page = this.page;
             dto.pageSize = this.pageSize;
-            dto.status = this.status;
             dto.deptId = this.deptId;
-            dto.dob = this.dob;
             dto.search = this.search;
             return dto;
         }
     }
-
 }

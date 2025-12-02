@@ -8,37 +8,87 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Data transfer object for updating user information. All fields are optional for partial updates.")
 public class UserUpdateDto {
+
     @Size(min = 3, message = "Username must be at least 3 characters")
-    private String username;
+    @Schema(
+        description = "Updated username (minimum 3 characters)",
+        example = "johndoe_updated",
+        minLength = 3
+    )
+    String username;
 
     @Size(min = 8, message = "Password must be at least 8 characters")
-    private String currentPassword;
+    @Schema(
+        description = "Current password for verification when changing password",
+        example = "currentPass123",
+        minLength = 8
+    )
+    String currentPassword;
 
     @Size(min = 8, message = "Password must be at least 8 characters")
-    private String password;
+    @Schema(
+        description = "New password (minimum 8 characters)",
+        example = "newPass123",
+        minLength = 8
+    )
+    String password;
 
-    private String gender;
+    @Schema(
+        description = "User's gender",
+        example = "MALE"
+    )
+    String gender;
 
-    private String country;
+    @Schema(
+        description = "User's country",
+        example = "Vietnam"
+    )
+    String country;
 
-    private String fullName;
+    @Schema(
+        description = "User's full name",
+        example = "John Doe"
+    )
+    String fullName;
 
-    private String profilePicImage;
+    @Schema(
+        description = "URL or path to user's profile picture",
+        example = "https://example.com/profiles/user123.jpg"
+    )
+    String profilePicImage;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-    @Schema(description = "Date of birth", example = "15/03/1985", type = "string", pattern = "dd/MM/yyyy")
-    private LocalDate dob;
+    @Schema(
+        description = "Date of birth",
+        example = "15/03/1985",
+        type = "string",
+        pattern = "dd/MM/yyyy"
+    )
+    LocalDate dob;
 
-    private UserRole role;
+    @Schema(
+        description = "User role (admin only)",
+        example = "USER"
+    )
+    UserRole role;
 
-    private UserStatus status;
+    @Schema(
+        description = "User account status (admin only)",
+        example = "ACTIVE"
+    )
+    UserStatus status;
 
     public static Builder builder() {
         return new Builder();
