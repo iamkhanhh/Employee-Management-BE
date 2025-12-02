@@ -24,6 +24,7 @@ import com.tlu.EmployeeManagement.dto.response.LeaveRequestWithEmployeeDto;
 import com.tlu.EmployeeManagement.enums.RoleInDepartment;
 import java.util.ArrayList;
 import java.util.List;
+import com.tlu.EmployeeManagement.dto.response.LeaveSummaryResponse;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -138,7 +139,7 @@ public class LeaveRequestService {
         leaveRequestRepository.deleteById(id);
     }
 
-    // 3) list my requests with optional filters
+   
     public List<LeaveRequest> listMyRequests(LeaveStatus status, LocalDate startDate, LocalDate endDate) {
         Integer currentUserId = SecurityUtils.getCurrentUserId();
         if (currentUserId == null) throw new RuntimeException("Unauthenticated");
@@ -196,7 +197,7 @@ public class LeaveRequestService {
 
         checkApproverPermission(leaveRequest, approverEmpId);
 
-    leaveRequest.setStatus(LeaveStatus.REJECTED);
+        leaveRequest.setStatus(LeaveStatus.REJECTED);
         leaveRequest.setApprovedBy(approverEmpId);
         leaveRequest.setApprovedDate(LocalDate.now());
         leaveRequest.setRejectReason(rejectReason);
@@ -263,5 +264,24 @@ public class LeaveRequestService {
         System.out.println("HeadOptId: " + headOpt.get().getId());
         throw new RuntimeException("Forbidden: not allowed to approve/reject this leave");
     }
+
+    public LeaveSummaryResponse getDepartmentLeaveSummary(Integer deptId) {
+        Integer currentUserId = SecurityUtils.getCurrentUserId();
+        if (currentUserId == null) throw new RuntimeException("Unauthenticated");
+        Employee currentEmp = employeeRepository.findByUserId(currentUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Current employee not found"));
+        if (!deptId.equals(currentEmp.getDeptId())) {
+            throw new RuntimeException("Forbidden: Not head of this department");
+        }
+        if (currentEmp.getRoleInDept() != RoleInDepartment.HEAD) {
+            throw new RuntimeException("Forbidden: Only department head can view summary");
+        }
+        long total = leaveRequestRepository.countByDept(deptId);
+        long pending = leaveRequestRepository.countByDeptAndStatus(deptId, LeaveStatus.PENDING);
+        long approved = leaveRequestRepository.countByDeptAndStatus(deptId, LeaveStatus.APPROVED);
+        long rejected = leaveRequestRepository.countByDeptAndStatus(deptId, LeaveStatus.REJECTED);
+        return new LeaveSummaryResponse(total, pending, approved, rejected);
+    }
+
 
 }

@@ -39,4 +39,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer>, Jp
     List<Employee> findByIsDeleted(boolean isDeleted);
 
     void deleteById(Integer id);
+
+    List<Employee> findByDeptId(Integer deptId);
+
 }
