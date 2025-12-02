@@ -48,5 +48,13 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Integer>
         @Param("endDate") LocalDateTime endDate
     );
 
+
+   @Query("SELECT a FROM Attendance a WHERE a.empId = :empId AND MONTH(a.checkIn) = :month AND YEAR(a.checkIn) = :year")
+    List<Attendance> findByEmpIdAndMonthAndYear(
+            @Param("empId") Integer empId,
+            @Param("month") int month,
+            @Param("year") int year
+    );
+
     void deleteById(Integer id);
 }

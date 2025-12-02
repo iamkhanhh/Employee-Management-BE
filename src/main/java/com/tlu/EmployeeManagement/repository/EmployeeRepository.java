@@ -25,4 +25,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer>, Jp
     List<Employee> findByDeptIdAndStatus(Integer deptId, EmployeeStatus status);
 
     void deleteById(Integer id);
+
+    List<Employee> findByDeptId(Integer deptId);
+
 }
