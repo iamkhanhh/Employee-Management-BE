@@ -22,6 +22,7 @@ import com.tlu.EmployeeManagement.dto.response.UserResponse;
 import com.tlu.EmployeeManagement.entity.User;
 import com.tlu.EmployeeManagement.enums.UserRole;
 import com.tlu.EmployeeManagement.enums.UserStatus;
+import com.tlu.EmployeeManagement.repository.EmployeeRepository;
 import com.tlu.EmployeeManagement.repository.UserRepository;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -35,6 +36,7 @@ import lombok.experimental.FieldDefaults;
 public class UserService {
 
     UserRepository userRepository;
+    EmployeeRepository employeeRepository;
     BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public PagedResponse<UserResponse> getUser(UserFilterDto filterDto) {
@@ -155,6 +157,22 @@ public class UserService {
             }
         }
         return null;
+    }
+
+    public List<UserResponse> getUsersNotLinkedToEmployee() {
+        List<User> allUsers = userRepository.findAll();
+
+        List<User> unlinkedUsers = allUsers.stream()
+                .filter(user -> {
+                    return employeeRepository.findByUserId(user.getId()).isEmpty();
+                })
+                .filter(user -> user.getStatus() == UserStatus.ACTIVE)
+                .filter(user -> user.getRole() != UserRole.ADMIN)
+                .collect(Collectors.toList());
+
+        return unlinkedUsers.stream()
+                .map(this::toUserResponse)
+                .collect(Collectors.toList());
     }
 
     private UserResponse toUserResponse(User user) {

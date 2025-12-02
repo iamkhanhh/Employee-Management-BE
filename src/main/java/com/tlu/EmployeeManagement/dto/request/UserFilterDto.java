@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.tlu.EmployeeManagement.enums.UserStatus;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,19 +16,48 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Filter criteria for querying users with pagination")
 public class UserFilterDto {
 
+    @Schema(
+        description = "Page number (zero-based)",
+        example = "0",
+        defaultValue = "0"
+    )
     Integer page = 0;
 
+    @Schema(
+        description = "Number of items per page",
+        example = "10",
+        defaultValue = "10"
+    )
     Integer pageSize = 10;
 
+    @Schema(
+        description = "Filter by user status",
+        example = "ACTIVE"
+    )
     UserStatus status;
 
+    @Schema(
+        description = "Filter by department ID",
+        example = "1"
+    )
     Integer deptId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @Schema(
+        description = "Filter by date of birth",
+        example = "01/01/1990",
+        type = "string",
+        pattern = "dd/MM/yyyy"
+    )
     LocalDate dob;
 
+    @Schema(
+        description = "Search keyword to filter users by username, email, or full name (case-insensitive)",
+        example = "john"
+    )
     String search;
 
     public static Builder builder() {

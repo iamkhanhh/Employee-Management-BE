@@ -36,16 +36,7 @@ public class PayRollController {
                 .build();
     }
 
-    // @PutMapping()
-    // public ApiResponse<List<PayRollResponse>> createPayrollUpdate(@Valid @RequestBody PayRollDto dto) {
-    //     PayRollResponse updated = payRollService.updatePayRoll(dto);
-    //       return ApiResponse.<PayRollResponse>builder()
-    //             .code(201)
-    //             .status("success")
-    //             .message("Payroll updated  successfully")
-    //             .data(updated)
-    //             .build();
-    // }
+  
     @PostMapping("/single")
     public ApiResponse<PayRollResponse> createSinglePayroll(@Valid @RequestBody PayRollDto dto) {
         PayRollResponse created = payRollService.insertPayRoll(dto);

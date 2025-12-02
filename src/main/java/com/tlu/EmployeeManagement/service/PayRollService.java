@@ -170,27 +170,7 @@ public class PayRollService {
         return responses;
     }
 
-    public PayRollResponse updatePayRoll(PayRollDto dto) {
-        Payroll payroll = payrollRepository.findById(dto.getId())
-            .orElseThrow(() -> new ResourceNotFoundException("Payroll not found with id: " + dto.getId()));
-        Employee emp = employeeRepository.findById(payroll.getEmpId())
-            .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + payroll.getEmpId())); 
-        Integer currentUserId = SecurityUtils.getCurrentUserId();
-        if (currentUserId == null) throw new RuntimeException("Current user not authenticated");
-        Employee head = employeeRepository.findByUserId(currentUserId)
-        .orElseThrow(() -> new ResourceNotFoundException("Employee not found with userId: " + currentUserId));
-        if (!head.getDeptId().equals(emp.getDeptId()) || head.getRoleInDept() != RoleInDepartment.HEAD) {
-            throw new RuntimeException("Forbidden: only department head can update payroll for their department");
-        }    
 
-        payroll.setAllowance(dto.getAllowance());
-        payroll.setBonus(dto.getBonus());
-        payroll.setDeduction(dto.getDeduction());
-        BigDecimal basic = emp.getBasicSalary() != null ? emp.getBasicSalary() : BigDecimal.ZERO;
-        payroll.setStatus(PayrollStatus.PENDING);
-        Payroll saved = payrollRepository.save(payroll);
-        return toPayRollResponse(saved);
-    }
 
     public List<PayRollResponse> getPayrollDept(Integer deptId) {
         Integer currentUserId = SecurityUtils.getCurrentUserId();

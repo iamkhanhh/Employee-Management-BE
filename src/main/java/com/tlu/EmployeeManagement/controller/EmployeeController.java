@@ -125,4 +125,16 @@ public class EmployeeController {
         apiResponse.setMessage("Employee deleted successfully");
         return apiResponse;
     }
+
+    @Operation(summary = "Get current user's employee info", description = "Retrieve the employee information for the currently authenticated user")
+    @GetMapping("/me")
+    public ApiResponse<EmployeeResponse> getCurrentUserEmployee() {
+        EmployeeResponse employee = employeeService.getCurrentUserEmployee();
+
+        ApiResponse<EmployeeResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setStatus("success");
+        apiResponse.setMessage("Get current user employee info successfully");
+        apiResponse.setData(employee);
+        return apiResponse;
+    }
 }
