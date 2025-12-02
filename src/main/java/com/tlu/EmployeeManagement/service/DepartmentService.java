@@ -8,8 +8,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tlu.EmployeeManagement.dto.request.DepartmentDto;
 import com.tlu.EmployeeManagement.dto.response.DepartmentResponse;
+import com.tlu.EmployeeManagement.entity.Employee;
 import com.tlu.EmployeeManagement.entity.Department;
 import com.tlu.EmployeeManagement.repository.DepartmentRepository;
+import com.tlu.EmployeeManagement.repository.EmployeeRepository;
+import com.tlu.EmployeeManagement.enums.RoleInDepartment;
+import com.tlu.EmployeeManagement.dto.response.DepartmentSummaryDto;
+
 
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,6 +27,7 @@ import lombok.AccessLevel;
 public class DepartmentService {
 
     DepartmentRepository departmentRepository;
+    EmployeeRepository employeeRepository;
 
     public DepartmentResponse createDepartment(DepartmentDto createDto) {
 
@@ -32,12 +38,13 @@ public class DepartmentService {
         department.setDeptName(createDto.getDeptName());
         department.setIsDeleted(false);
 
+
         Department saved = departmentRepository.save(department);
         return toDepartmentResponse(saved);
     }
 
-
     public DepartmentResponse updateDepartment(Integer id, DepartmentDto updateDto) {
+
         Department department = departmentRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Department not found with id: " + id));
 
@@ -49,12 +56,10 @@ public class DepartmentService {
             .filter(d -> !d.getId().equals(id))
             .ifPresent(d -> { throw new RuntimeException("Department name already exists"); });
 
-        department.setDeptName(updateDto.getDeptName());
-
+    department.setDeptName(updateDto.getDeptName());
         Department updated = departmentRepository.save(department);
         return toDepartmentResponse(updated);
     }
-
 
     public void deleteDepartment(Integer id) {
         Department department = departmentRepository.findById(id)
@@ -64,7 +69,6 @@ public class DepartmentService {
         departmentRepository.save(department);
     }
 
-
     public DepartmentResponse getDepartmentById(Integer id) {
         Department department = departmentRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Department not found with id: " + id));
@@ -72,9 +76,21 @@ public class DepartmentService {
         return toDepartmentResponse(department);
     }
 
-    public List<DepartmentResponse> getAllDepartments() {
+    // public List<DepartmentResponse> getAllDepartments() {
+    //     return departmentRepository.findByIsDeletedFalse().stream()
+    //             .map(this::toDepartmentResponse)
+    //             .collect(Collectors.toList());
+    // }
+
+    public List<DepartmentSummaryDto> getDepartmentSummaries() {
         return departmentRepository.findByIsDeletedFalse().stream()
-                .map(this::toDepartmentResponse)
+                .map(dept -> {
+                    Long count = employeeRepository.countByDeptId(dept.getId());
+                    String managerName = null;
+                    var headOpt = employeeRepository.findFirstByDeptIdAndRoleInDept(dept.getId(), RoleInDepartment.HEAD);
+                    if (headOpt.isPresent()) managerName = headOpt.get().getFullName();
+                    return new DepartmentSummaryDto(dept.getId(), dept.getDeptName(), managerName, count, dept.getCreatedAt());
+                })
                 .collect(Collectors.toList());
     }
 

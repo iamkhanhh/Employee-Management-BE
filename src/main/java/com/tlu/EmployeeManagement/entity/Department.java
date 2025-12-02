@@ -15,13 +15,13 @@ public class Department extends AbtractEntity {
     @Column(name = "dept_name", length = 100)
     private String deptName;
 
+
     public static Builder builder() {
         return new Builder();
     }
 
     public static class Builder {
-        private String deptName;
-
+    private String deptName;
         public Builder deptName(String deptName) {
             this.deptName = deptName;
             return this;
@@ -30,7 +30,9 @@ public class Department extends AbtractEntity {
         public Department build() {
             Department department = new Department();
             department.deptName = this.deptName;
+            // manager is not stored on Department; derive from Employee.roleInDept == HEAD
             return department;
         }
     }
+    
 }

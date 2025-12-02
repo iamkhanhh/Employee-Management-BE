@@ -7,6 +7,7 @@ import com.tlu.EmployeeManagement.enums.EmployeeStatus;
 import com.tlu.EmployeeManagement.enums.Gender;
 import com.tlu.EmployeeManagement.enums.RoleInDepartment;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Pattern;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -19,27 +20,47 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Data transfer object for updating employee information. All fields are optional for partial updates.")
 public class EmployeeUpdateDto {
 
+    @Schema(description = "Department ID", example = "1")
     Integer deptId;
 
+    @Schema(description = "Employee's full name", example = "John Doe")
     String fullName;
 
+    @Schema(description = "Employee's gender", example = "MALE")
     Gender gender;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @Schema(
+        description = "Date of birth",
+        example = "15/05/1990",
+        type = "string",
+        pattern = "dd/MM/yyyy"
+    )
     LocalDate dob;
 
     @Pattern(regexp = "^[0-9]{10,20}$", message = "Phone number must be between 10 and 20 digits")
+    @Schema(description = "Phone number (10-20 digits)", example = "0123456789")
     String phoneNumber;
 
+    @Schema(description = "Employee's address", example = "123 Main St, Hanoi, Vietnam")
     String address;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @Schema(
+        description = "Hire date",
+        example = "10/06/2020",
+        type = "string",
+        pattern = "dd/MM/yyyy"
+    )
     LocalDate hireDate;
 
+    @Schema(description = "Employee status", example = "ACTIVE")
     EmployeeStatus status;
 
+    @Schema(description = "Role in department", example = "STAFF")
     RoleInDepartment roleInDept;
 
     public static Builder builder() {

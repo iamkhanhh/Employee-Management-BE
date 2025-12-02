@@ -1,6 +1,7 @@
 package com.tlu.EmployeeManagement.controller;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -137,6 +138,21 @@ public class UserController {
         ApiResponse<Void> response = new ApiResponse<>();
         response.setStatus("success");
         response.setMessage("User deleted successfully");
+        return response;
+    }
+
+    @Operation(
+        summary = "Get users not linked to employees",
+        description = "Retrieve a list of users that are not linked to any employee record. Useful for creating new employee records."
+    )
+    @GetMapping("/unlinked")
+    public ApiResponse<List<UserResponse>> getUsersNotLinkedToEmployee() {
+        List<UserResponse> users = userService.getUsersNotLinkedToEmployee();
+
+        ApiResponse<List<UserResponse>> response = new ApiResponse<>();
+        response.setStatus("success");
+        response.setMessage("Get unlinked users successfully");
+        response.setData(users);
         return response;
     }
 }

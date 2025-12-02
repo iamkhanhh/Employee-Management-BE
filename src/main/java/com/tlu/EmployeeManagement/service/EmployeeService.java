@@ -24,6 +24,8 @@ import com.tlu.EmployeeManagement.repository.DepartmentRepository;
 import com.tlu.EmployeeManagement.repository.EmployeeRepository;
 import com.tlu.EmployeeManagement.repository.UserRepository;
 import com.tlu.EmployeeManagement.specification.EmployeeSpecification;
+import com.tlu.EmployeeManagement.util.SecurityUtils;
+import org.springframework.beans.factory.annotation.Value;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -31,11 +33,14 @@ import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class EmployeeService {
-    EmployeeRepository employeeRepository;
-    UserRepository userRepository;
-    DepartmentRepository departmentRepository;
+    final EmployeeRepository employeeRepository;
+    final UserRepository userRepository;
+    final DepartmentRepository departmentRepository;
+
+    @Value("${leave.annual.default-days}")
+    int defaultAnnualLeaveDays;
 
     public PagedResponse<EmployeeResponse> getEmployees(EmployeeFilterDto filterDto) {
         // Build specification for filtering
@@ -81,6 +86,17 @@ public class EmployeeService {
         return toEmployeeResponse(employee);
     }
 
+    public EmployeeResponse getEmployeeByUserId(Integer userId) {
+        Employee employee = employeeRepository.findByUserId(userId)
+            .orElseThrow(() -> new RuntimeException("Employee not found with userId: " + userId));
+
+        if (employee.getIsDeleted()) {
+            throw new RuntimeException("Employee has been deleted");
+        }
+
+        return toEmployeeResponse(employee);
+    }
+
     public EmployeeResponse createEmployee(EmployeeCreateDto createDto) {
         // Validate user exists
         userRepository.findById(createDto.getUserId())
@@ -101,6 +117,7 @@ public class EmployeeService {
         employee.setHireDate(createDto.getHireDate());
         employee.setStatus(createDto.getStatus() != null ? createDto.getStatus() : EmployeeStatus.ACTIVE);
         employee.setRoleInDept(createDto.getRoleInDept() != null ? createDto.getRoleInDept() : RoleInDepartment.STAFF);
+    // annual leave is derived from leave requests per year; no stored balance
         employee.setIsDeleted(false);
 
         Employee savedEmployee = employeeRepository.save(employee);
@@ -158,6 +175,22 @@ public class EmployeeService {
         // Soft delete
         employee.setIsDeleted(true);
         employeeRepository.save(employee);
+    }
+
+    public EmployeeResponse getCurrentUserEmployee() {
+        Integer currentUserId = SecurityUtils.getCurrentUserId();
+        if (currentUserId == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        Employee employee = employeeRepository.findByUserId(currentUserId)
+            .orElseThrow(() -> new RuntimeException("Employee not found for current user"));
+
+        if (employee.getIsDeleted()) {
+            throw new RuntimeException("Employee has been deleted");
+        }
+
+        return toEmployeeResponse(employee);
     }
 
     public EmployeeResponse toEmployeeResponse(Employee employee) {

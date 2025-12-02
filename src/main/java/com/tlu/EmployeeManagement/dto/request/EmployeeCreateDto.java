@@ -7,6 +7,7 @@ import com.tlu.EmployeeManagement.enums.EmployeeStatus;
 import com.tlu.EmployeeManagement.enums.Gender;
 import com.tlu.EmployeeManagement.enums.RoleInDepartment;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -22,7 +23,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EmployeeCreateDto {
-
     @NotNull(message = "User ID is required")
     Integer userId;
 
@@ -37,6 +37,7 @@ public class EmployeeCreateDto {
 
     @NotNull(message = "Date of birth is required")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @Schema(description = "Date of birth", example = "28/11/2000", type = "string", pattern = "dd/MM/yyyy")
     LocalDate dob;
 
     @Pattern(regexp = "^[0-9]{10,20}$", message = "Phone number must be between 10 and 20 digits")
@@ -46,6 +47,7 @@ public class EmployeeCreateDto {
 
     @NotNull(message = "Hire date is required")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @Schema(description = "Hire date", example = "01/01/2025", type = "string", pattern = "dd/MM/yyyy")
     LocalDate hireDate;
 
     EmployeeStatus status;

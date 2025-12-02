@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import jakarta.servlet.http.HttpServletRequest;
 
+
 import com.tlu.EmployeeManagement.specification.UserSpecification;
 import com.tlu.EmployeeManagement.dto.request.RegisterUserDto;
 import com.tlu.EmployeeManagement.dto.request.UserFilterDto;
@@ -19,7 +20,9 @@ import com.tlu.EmployeeManagement.dto.request.UserUpdateDto;
 import com.tlu.EmployeeManagement.dto.response.PagedResponse;
 import com.tlu.EmployeeManagement.dto.response.UserResponse;
 import com.tlu.EmployeeManagement.entity.User;
+import com.tlu.EmployeeManagement.enums.UserRole;
 import com.tlu.EmployeeManagement.enums.UserStatus;
+import com.tlu.EmployeeManagement.repository.EmployeeRepository;
 import com.tlu.EmployeeManagement.repository.UserRepository;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -33,6 +36,7 @@ import lombok.experimental.FieldDefaults;
 public class UserService {
 
     UserRepository userRepository;
+    EmployeeRepository employeeRepository;
     BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public PagedResponse<UserResponse> getUser(UserFilterDto filterDto) {
@@ -89,6 +93,8 @@ public class UserService {
         user.setUsername(dto.getUsername());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setStatus(UserStatus.ACTIVE);
+        user.setEmail(dto.getEmail());
+        user.setRole(UserRole.USER);
 
 
         User saved = userRepository.save(user);
@@ -151,6 +157,22 @@ public class UserService {
             }
         }
         return null;
+    }
+
+    public List<UserResponse> getUsersNotLinkedToEmployee() {
+        List<User> allUsers = userRepository.findAll();
+
+        List<User> unlinkedUsers = allUsers.stream()
+                .filter(user -> {
+                    return employeeRepository.findByUserId(user.getId()).isEmpty();
+                })
+                .filter(user -> user.getStatus() == UserStatus.ACTIVE)
+                .filter(user -> user.getRole() != UserRole.ADMIN)
+                .collect(Collectors.toList());
+
+        return unlinkedUsers.stream()
+                .map(this::toUserResponse)
+                .collect(Collectors.toList());
     }
 
     private UserResponse toUserResponse(User user) {

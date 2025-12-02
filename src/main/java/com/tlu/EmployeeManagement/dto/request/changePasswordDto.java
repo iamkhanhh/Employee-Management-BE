@@ -1,24 +1,48 @@
 package com.tlu.EmployeeManagement.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Data transfer object for changing user password")
 public class changePasswordDto {
 
     @NotBlank(message = "Current password is required")
-    private String currentPassword;
+    @Schema(
+        description = "User's current password for verification",
+        example = "oldPassword123",
+        required = true
+    )
+    String currentPassword;
 
     @NotBlank(message = "New password is required")
     @Size(min = 8, message = "Password must be at least 8 characters")
-    private String newPassword;
+    @Schema(
+        description = "New password (minimum 8 characters)",
+        example = "newSecurePassword456",
+        required = true,
+        minLength = 8
+    )
+    String newPassword;
 
     @NotBlank(message = "Confirm password is required")
     @Size(min = 8, message = "Password must be at least 8 characters")
-    private String confirmPassword;
+    @Schema(
+        description = "Confirmation of new password (must match newPassword)",
+        example = "newSecurePassword456",
+        required = true,
+        minLength = 8
+    )
+    String confirmPassword;
 
     public static Builder builder() {
         return new Builder();
