@@ -196,4 +196,13 @@ public class LeaveRequestController {
         return ApiResponse.<List<LeaveRequest>>builder().code(200).status("success").data(list).build();
     }
 
+    @GetMapping("/summary/department/{deptId}")
+    public ApiResponse<?> getDepartmentLeaveSummary(@PathVariable Integer deptId) {
+        var summary = leaveRequestService.getDepartmentLeaveSummary(deptId);
+        return ApiResponse.builder()
+                .code(200)  
+                .status("success")
+                .data(summary)
+                .build();
+    }
 }
