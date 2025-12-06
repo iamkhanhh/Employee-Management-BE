@@ -167,8 +167,12 @@ public class LeaveRequestController {
     @Operation(summary = "Get leave requests by department", description = "Retrieve all leave requests for a specific department")
     @GetMapping("/department/{deptId}")
     public ApiResponse<List<LeaveRequestWithEmployeeDto>> listByDepartment(
-            @Parameter(description = "Department ID", required = true, example = "1") @PathVariable Integer deptId) {
-        var list = leaveRequestService.listByDepartment(deptId);
+            @Parameter(description = "Department ID", required = true, example = "1") @PathVariable Integer deptId,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) LeaveStatus status
+            ) {
+        var list = leaveRequestService.listByDepartment(deptId,month,year,status);
         return ApiResponse.<List<LeaveRequestWithEmployeeDto>>builder()
                 .code(200)
                 .status("success")

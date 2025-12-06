@@ -39,8 +39,10 @@ public class TaskService {
         public TaskResponse createTask(TaskCreateDto dto) {
                 Integer currentUserId = SecurityUtils.getCurrentUserId();
                 if (currentUserId == null) throw new RuntimeException("Unauthenticated");
+
                 Employee emp = employeeRepository.findByUserId(currentUserId)
-                                                .orElseThrow(() -> new RuntimeException("Employee not found for current user"));
+                        .orElseThrow(() -> new RuntimeException("Employee not found for current user"));
+
                 Department dept = departmentRepository.findById(emp.getDeptId())
                         .orElseThrow(() -> new RuntimeException("Department not found"));
 
@@ -55,52 +57,65 @@ public class TaskService {
                 task.setDueDate(dto.getDueDate());
                 task.setCreatedBy(emp.getId());
                 task.setStatus(TaskStatus.PENDING);
-                Task saved = taskRepository.save(task);
-                return toTaskResponse(saved);
-        }
-
-        public TaskResponse assignTask(Integer taskId, TaskAssignDto dto) {
-                Task task = taskRepository.findById(taskId)
-                                .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
-
-                Employee employee = employeeRepository.findById(dto.getEmployeeId())
-                                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
-
-                Employee creator = employeeRepository.findById(task.getCreatedBy())
-                                .orElseThrow(() -> new ResourceNotFoundException("Task creator employee not found"));
-
-                if (creator.getDeptId() == null || !creator.getDeptId().equals(employee.getDeptId())) {
-                        throw new ValidationException("Employee must be in the same department as task creator");
+                Task savedTask = taskRepository.save(task);
+                if (dto.getEmployeeIds() != null && !dto.getEmployeeIds().isEmpty()) {
+                        for (Integer empId : dto.getEmployeeIds()) {
+                        Employee e = employeeRepository.findById(empId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Employee not found: " + empId));
+                        if (!e.getDeptId().equals(emp.getDeptId())) {
+                                throw new ValidationException("Employee " + empId + " is not in this department");
+                        }
+                        taskAssignmentRepository.findByTaskIdAndEmpId(savedTask.getId(), empId)
+                                .ifPresent(a -> { throw new ValidationException("Employee " + empId + " already assigned"); });
+                        TaskAssignment assignment = new TaskAssignment();
+                        assignment.setTaskId(savedTask.getId());
+                        assignment.setEmpId(empId);
+                        assignment.setAssignedDate(LocalDateTime.now());
+                        assignment.setCompletedDate(null);
+                        taskAssignmentRepository.save(assignment);
+                        }
                 }
-                taskAssignmentRepository.findByTaskIdAndEmpId(taskId, dto.getEmployeeId())
-                                .ifPresent(a -> { throw new ValidationException("Employee already assigned to this task"); });
-
-                TaskAssignment assignment = new TaskAssignment();
-                assignment.setTaskId(taskId);
-                assignment.setEmpId(dto.getEmployeeId());
-                assignment.setAssignedDate(LocalDateTime.now());
-                assignment.setCompletedDate(null);
-                taskAssignmentRepository.save(assignment);
-        
-                return toTaskResponse(task);
+                return toTaskResponse(savedTask);
         }
+
 
         @Transactional(readOnly = true)
-        public List<TaskResponse> getTasksForCurrentUser(Integer userId) {
+        public List<TaskResponse> getTasksForCurrentUser(Integer userId, Integer month, Integer year, TaskStatus status) {
                 if (userId == null) throw new RuntimeException("Unauthenticated");
-                Employee emp = employeeRepository.findByUserId(userId)
-                                .orElseThrow(() -> new RuntimeException("Employee not found for current user"));
 
+                Employee emp = employeeRepository.findByUserId(userId)
+                        .orElseThrow(() -> new RuntimeException("Employee not found for current user"));
+
+                List<Task> tasks;
                 if (emp.getRoleInDept() == RoleInDepartment.HEAD) {
-                        return taskRepository.findByCreatedBy(emp.getId()).stream().map(this::toTaskResponse).collect(Collectors.toList());
-                } else {
-                        return taskAssignmentRepository.findActiveAssignmentsByEmpId(emp.getId()).stream()
-                                        .map(a -> taskRepository.findById(a.getTaskId()).orElse(null))
-                                        .filter(t -> t != null)
-                                        .map(this::toTaskResponse)
-                                        .collect(Collectors.toList());
+                        tasks = taskRepository.findByCreatedBy(emp.getId());
+                } 
+                else {
+                        tasks = taskAssignmentRepository.findActiveAssignmentsByEmpId(emp.getId()).stream()
+                                .map(a -> taskRepository.findById(a.getTaskId()).orElse(null))
+                                .filter(t -> t != null)
+                                .collect(Collectors.toList());
                 }
+                if (month != null) {
+                        tasks = tasks.stream()
+                                .filter(t -> t.getCreatedAt().getMonthValue() == month)
+                                .collect(Collectors.toList());
+                }
+                if (year != null) {
+                        tasks = tasks.stream()
+                                .filter(t -> t.getCreatedAt().getYear() == year)
+                                .collect(Collectors.toList());
+                }
+                if (status != null) {
+                        tasks = tasks.stream()
+                                .filter(t -> t.getStatus() == status)
+                                .collect(Collectors.toList());
+                }
+                return tasks.stream()
+                        .map(this::toTaskResponse)
+                        .collect(Collectors.toList());
         }
+
 
         @Transactional
         public TaskResponse updateTaskStatus(Integer taskId, TaskStatus newStatus, Integer userId) {

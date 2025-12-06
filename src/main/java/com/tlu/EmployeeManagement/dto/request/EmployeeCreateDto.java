@@ -1,6 +1,7 @@
 package com.tlu.EmployeeManagement.dto.request;
 
 import java.time.LocalDate;
+import java.math.BigDecimal;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.tlu.EmployeeManagement.enums.EmployeeStatus;
@@ -54,6 +55,9 @@ public class EmployeeCreateDto {
 
     RoleInDepartment roleInDept;
 
+    @NotNull(message = "Basic salary is required")
+    BigDecimal basicSalary;
+
     public static Builder builder() {
         return new Builder();
     }
@@ -69,6 +73,7 @@ public class EmployeeCreateDto {
         private LocalDate hireDate;
         private EmployeeStatus status;
         private RoleInDepartment roleInDept;
+        private BigDecimal basicSalary;
 
         public Builder userId(Integer userId) {
             this.userId = userId;
@@ -120,6 +125,11 @@ public class EmployeeCreateDto {
             return this;
         }
 
+        public Builder basicSalary(BigDecimal basicSalary) {
+            this.basicSalary = basicSalary;
+            return this;
+        }
+
         public EmployeeCreateDto build() {
             EmployeeCreateDto dto = new EmployeeCreateDto();
             dto.userId = this.userId;
@@ -132,6 +142,7 @@ public class EmployeeCreateDto {
             dto.hireDate = this.hireDate;
             dto.status = this.status;
             dto.roleInDept = this.roleInDept;
+            dto.basicSalary = this.basicSalary;
             return dto;
         }
     }
