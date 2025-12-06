@@ -148,6 +148,7 @@ public class PayRollService {
         return responses;
     }
 
+    
   
     // public PayRollResponse updatePayRoll(Integer payrollId, PayRollDto dto) {
     //     String role = SecurityUtils.getCurrentUserRole();
@@ -185,29 +186,7 @@ public class PayRollService {
     // }
 
 
-    public List<PayRollResponse> getPayrollDept(Integer deptId, Integer month, Integer year) {
-        Integer currentUserId = SecurityUtils.getCurrentUserId();
-        if (currentUserId == null) throw new RuntimeException("Current user not authenticated");
-        Employee currentEmp = employeeRepository.findByUserId(currentUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("Current employee not found"));
-        if (!deptId.equals(currentEmp.getDeptId())) {
-            throw new RuntimeException("Forbidden: Not head of this department");
-        }
-        if (currentEmp.getRoleInDept() != RoleInDepartment.HEAD) {
-            throw new RuntimeException("Forbidden: Only department head can view summary");
-        }
-        // tu deptid -> list employee -> payroll co employeeid
-        List<Payroll> payrolls = payrollRepository.findPayrollsByDepartment(deptId);
-        payrolls = payrolls.stream()
-        .filter(p ->
-                p.getCreatedAt().getMonthValue() == month &&
-                p.getCreatedAt().getYear() == year
-        )   
-        .collect(Collectors.toList());
-        return payrolls.stream()
-                .map(this::toPayRollResponse)
-                .collect(Collectors.toList());
-    }
+   
 
     public List<PayRollResponse> filterPayroll(Integer month, Integer year, Integer deptId, String status) {
         PayrollStatus st = null;

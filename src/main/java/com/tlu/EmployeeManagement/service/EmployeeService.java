@@ -15,6 +15,7 @@ import com.tlu.EmployeeManagement.dto.request.EmployeeFilterDto;
 import com.tlu.EmployeeManagement.dto.request.EmployeeUpdateDto;
 import com.tlu.EmployeeManagement.dto.response.EmployeeResponse;
 import com.tlu.EmployeeManagement.dto.response.PagedResponse;
+import com.tlu.EmployeeManagement.dto.response.PerformanceStatisticsResponse;
 import com.tlu.EmployeeManagement.entity.Department;
 import com.tlu.EmployeeManagement.entity.Employee;
 import com.tlu.EmployeeManagement.entity.User;
@@ -23,9 +24,17 @@ import com.tlu.EmployeeManagement.enums.RoleInDepartment;
 import com.tlu.EmployeeManagement.repository.DepartmentRepository;
 import com.tlu.EmployeeManagement.repository.EmployeeRepository;
 import com.tlu.EmployeeManagement.repository.UserRepository;
+import com.tlu.EmployeeManagement.repository.AttendanceRepository;
+import com.tlu.EmployeeManagement.repository.TaskAssignmentRepository;
+import com.tlu.EmployeeManagement.repository.LeaveRequestRepository;
 import com.tlu.EmployeeManagement.specification.EmployeeSpecification;
 import com.tlu.EmployeeManagement.util.SecurityUtils;
+import com.tlu.EmployeeManagement.enums.LeaveStatus;
+import com.tlu.EmployeeManagement.enums.LeaveType;
 import org.springframework.beans.factory.annotation.Value;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +47,9 @@ public class EmployeeService {
     final EmployeeRepository employeeRepository;
     final UserRepository userRepository;
     final DepartmentRepository departmentRepository;
+    final AttendanceRepository attendanceRepository;
+    final TaskAssignmentRepository taskAssignmentRepository;
+    final LeaveRequestRepository leaveRequestRepository;
 
     @Value("${leave.annual.default-days}")
     int defaultAnnualLeaveDays;
@@ -117,7 +129,7 @@ public class EmployeeService {
         employee.setHireDate(createDto.getHireDate());
         employee.setStatus(createDto.getStatus() != null ? createDto.getStatus() : EmployeeStatus.ACTIVE);
         employee.setRoleInDept(createDto.getRoleInDept() != null ? createDto.getRoleInDept() : RoleInDepartment.STAFF);
-    // annual leave is derived from leave requests per year; no stored balance
+        employee.setBasicSalary(createDto.getBasicSalary());
         employee.setIsDeleted(false);
 
         Employee savedEmployee = employeeRepository.save(employee);
@@ -223,6 +235,81 @@ public class EmployeeService {
             .status(employee.getStatus() != null ? employee.getStatus().name() : null)
             .username(username)
             .createdAt(employee.getCreatedAt())
+            .build();
+    }
+
+    public PerformanceStatisticsResponse getEmployeePerformanceStatistics() {
+        Integer currentUserId = SecurityUtils.getCurrentUserId();
+        if (currentUserId == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        Employee employee = employeeRepository.findByUserId(currentUserId)
+            .orElseThrow(() -> new RuntimeException("Employee not found for current user"));
+
+        if (employee.getIsDeleted()) {
+            throw new RuntimeException("Employee has been deleted");
+        }
+
+        Integer empId = employee.getId();
+        YearMonth currentMonth = YearMonth.now();
+        int month = currentMonth.getMonthValue();
+        int year = currentMonth.getYear();
+
+        var attendances = attendanceRepository.findByEmpIdAndMonthAndYear(empId, month, year);
+        Integer workingDaysThisMonth = attendances.size();
+
+        Double overtimeHoursThisMonth = attendances.stream()
+            .filter(a -> a.getOvertimeHours() != null)
+            .mapToDouble(a -> a.getOvertimeHours().doubleValue())
+            .sum();
+
+        var allAssignments = taskAssignmentRepository.findByEmpId(empId);
+
+        LocalDate startOfMonth = currentMonth.atDay(1);
+        LocalDate endOfMonth = currentMonth.atEndOfMonth();
+
+        var assignmentsThisMonth = allAssignments.stream()
+            .filter(ta -> ta.getCreatedAt() != null)
+            .filter(ta -> {
+                LocalDate createdDate = ta.getCreatedAt().toLocalDate();
+                return !createdDate.isBefore(startOfMonth) && !createdDate.isAfter(endOfMonth);
+            })
+            .toList();
+
+        Integer totalTasksThisMonth = assignmentsThisMonth.size();
+
+        Integer completedTasksThisMonth = (int) assignmentsThisMonth.stream()
+            .filter(ta -> ta.getCompletedDate() != null)
+            .count();
+
+        Double taskCompletionRate = totalTasksThisMonth > 0
+            ? (completedTasksThisMonth * 100.0) / totalTasksThisMonth
+            : 0.0;
+
+        var annualLeaveRequests = leaveRequestRepository.findByEmpIdAndStatus(empId, LeaveStatus.APPROVED)
+            .stream()
+            .filter(lr -> lr.getLeaveType() == LeaveType.ANNUAL_LEAVE)
+            .filter(lr -> lr.getStartDate().getYear() == year)
+            .toList();
+
+        long totalApprovedLeaveDays = annualLeaveRequests.stream()
+            .mapToLong(lr -> ChronoUnit.DAYS.between(lr.getStartDate(), lr.getEndDate()) + 1)
+            .sum();
+
+        Integer remainingLeaveDays = defaultAnnualLeaveDays - (int) totalApprovedLeaveDays;
+
+        Integer pendingLeaveRequests = (int) leaveRequestRepository.findByEmpIdAndStatus(empId, LeaveStatus.PENDING)
+            .size();
+
+        return PerformanceStatisticsResponse.builder()
+            .workingDaysThisMonth(workingDaysThisMonth)
+            .completedTasksThisMonth(completedTasksThisMonth)
+            .totalTasksThisMonth(totalTasksThisMonth)
+            .taskCompletionRate(Math.round(taskCompletionRate * 100.0) / 100.0)
+            .remainingLeaveDays(remainingLeaveDays)
+            .pendingLeaveRequests(pendingLeaveRequests)
+            .overtimeHoursThisMonth(Math.round(overtimeHoursThisMonth * 100.0) / 100.0)
             .build();
     }
 }

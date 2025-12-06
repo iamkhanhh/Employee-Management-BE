@@ -21,15 +21,16 @@ import com.tlu.EmployeeManagement.dto.request.EmployeeUpdateDto;
 import com.tlu.EmployeeManagement.dto.response.ApiResponse;
 import com.tlu.EmployeeManagement.dto.response.EmployeeResponse;
 import com.tlu.EmployeeManagement.dto.response.PagedResponse;
+import com.tlu.EmployeeManagement.dto.response.PerformanceStatisticsResponse;
 import com.tlu.EmployeeManagement.enums.EmployeeStatus;
 import com.tlu.EmployeeManagement.service.EmployeeService;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
+    import io.swagger.v3.oas.annotations.Operation;
+    import io.swagger.v3.oas.annotations.Parameter;
+    import io.swagger.v3.oas.annotations.responses.ApiResponses;
+    import io.swagger.v3.oas.annotations.tags.Tag;
+    import io.swagger.v3.oas.annotations.media.Content;
+    import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -135,6 +136,21 @@ public class EmployeeController {
         apiResponse.setStatus("success");
         apiResponse.setMessage("Get current user employee info successfully");
         apiResponse.setData(employee);
+        return apiResponse;
+    }
+
+    @Operation(
+        summary = "Get current user performance statistics",
+        description = "Retrieve performance statistics for the currently authenticated employee including working days, completed tasks, leave days, and overtime hours for the current month"
+    )
+    @GetMapping("/performance-statistics")
+    public ApiResponse<PerformanceStatisticsResponse> getPerformanceStatistics() {
+        PerformanceStatisticsResponse statistics = employeeService.getEmployeePerformanceStatistics();
+
+        ApiResponse<PerformanceStatisticsResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setStatus("success");
+        apiResponse.setMessage("Get performance statistics successfully");
+        apiResponse.setData(statistics);
         return apiResponse;
     }
 }
