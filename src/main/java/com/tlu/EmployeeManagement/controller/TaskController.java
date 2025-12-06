@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import com.tlu.EmployeeManagement.util.SecurityUtils;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import com.tlu.EmployeeManagement.enums.TaskStatus;
 
 
 @Tag(name = "Task", description = "APIs for managing tasks and assignments")
@@ -42,23 +43,24 @@ public class TaskController {
                 .build();
     }
 
-    @Operation(summary = "Assign task to employee", description = "Assign a task to one or more employees")
-    @PostMapping("/{taskId}/assign")
-    public ApiResponse<TaskResponse> assign(
-            @Parameter(description = "Task ID", required = true, example = "1") @PathVariable Integer taskId,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Task assignment data", required = true)
-            @Valid @RequestBody TaskAssignDto dto) {
-        TaskResponse updated = taskService.assignTask(taskId, dto);
-        return ApiResponse.<TaskResponse>builder().code(200).status("success").data(updated).build();
-    }
-
     @Operation(summary = "Get current user's tasks", description = "Retrieve all tasks assigned to the currently authenticated user")
     @GetMapping("/me")
-    public ApiResponse<List<TaskResponse>> myTasks() {
+    public ApiResponse<List<TaskResponse>> myTasks(
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) TaskStatus status
+    ) {
         Integer userId = SecurityUtils.getCurrentUserId();
-        List<TaskResponse> tasks = taskService.getTasksForCurrentUser(userId);
-        return ApiResponse.<List<TaskResponse>>builder().code(200).status("success").data(tasks).build();
+
+        List<TaskResponse> tasks = taskService.getTasksForCurrentUser(userId, month, year, status);
+
+        return ApiResponse.<List<TaskResponse>>builder()
+                .code(200)
+                .status("success")
+                .data(tasks)
+                .build();
     }
+
 
     @Operation(summary = "Update task status", description = "Update the status of a task (e.g., from IN_PROGRESS to COMPLETED)")
     @PatchMapping("/{taskId}/status")

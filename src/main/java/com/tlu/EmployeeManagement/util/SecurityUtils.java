@@ -26,4 +26,19 @@ public class SecurityUtils {
         }
         return null;
     }
+
+    public static String getCurrentUserRole() {
+        RequestAttributes attrs = RequestContextHolder.getRequestAttributes();
+        if (attrs == null) return null;
+        ServletRequestAttributes sra = (ServletRequestAttributes) attrs;
+        HttpServletRequest request = sra.getRequest();
+        Object userObj = request.getAttribute("user");
+        if (userObj instanceof Map) {
+            Map<?, ?> userMap = (Map<?, ?>) userObj;
+            Object roleObj = userMap.get("role");
+            if (roleObj == null) return null;
+            return roleObj.toString();
+        }
+        return null;
+    }
 }
