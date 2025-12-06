@@ -15,7 +15,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.tlu.EmployeeManagement.dto.request.PayRollDto;
-import com.tlu.EmployeeManagement.dto.request.DepartmentPayrollDto;
+
 
 @RestController
 @RequestMapping("/payrolls")
@@ -24,9 +24,11 @@ public class PayRollController {
     private final PayRollService payRollService;
 
     @PostMapping
-    public ApiResponse<List<PayRollResponse>> createPayroll(@Valid @RequestBody DepartmentPayrollDto dto) {
+    public ApiResponse<List<PayRollResponse>> createPayroll(
+        @RequestParam Integer deptId,
+        @Valid @RequestBody List<PayRollDto> dto) {
 
-        List<PayRollResponse> createdList = payRollService.createPayrollByDepartment(dto);
+        List<PayRollResponse> createdList = payRollService.createPayrollByDepartment(deptId,dto);
 
         return ApiResponse.<List<PayRollResponse>>builder()
                 .code(201)
@@ -36,17 +38,6 @@ public class PayRollController {
                 .build();
     }
 
-  
-    @PostMapping("/single")
-    public ApiResponse<PayRollResponse> createSinglePayroll(@Valid @RequestBody PayRollDto dto) {
-        PayRollResponse created = payRollService.insertPayRoll(dto);
-        return ApiResponse.<PayRollResponse>builder()
-                .code(201)
-                .status("success")
-                .message("Payroll created successfully")
-                .data(created)
-                .build();
-    }
 
     @GetMapping("")
     public ApiResponse<List<PayRollResponse>> filterPayroll(
@@ -54,12 +45,12 @@ public class PayRollController {
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Integer deptId,
             @RequestParam(required = false) String status
-    ) {
-        return ApiResponse.<List<PayRollResponse>>builder()
-                .code(200)
-                .status("success")
-                .data(payRollService.filterPayroll(month, year, deptId, status))
-                .build();
+        ) {
+            return ApiResponse.<List<PayRollResponse>>builder()
+                    .code(200)
+                    .status("success")
+                    .data(payRollService.filterPayroll(month, year, deptId, status))
+                    .build();
     }
 
 
@@ -73,13 +64,28 @@ public class PayRollController {
     }
 
     @GetMapping("/department/{deptId}")
-    public ApiResponse<List<PayRollResponse>> getPayrollByDepartment(@PathVariable Integer deptId) {
+    public ApiResponse<List<PayRollResponse>> getPayrollByDepartment(
+            @PathVariable Integer deptId,
+            @RequestParam Integer month,
+            @RequestParam Integer year) {
+
         return ApiResponse.<List<PayRollResponse>>builder()
                 .code(200)
                 .status("success")
-                .data(payRollService.getPayrollDept(deptId))
-                .build();   
+                .data(payRollService.getPayrollDept(deptId, month, year))
+                .build();
     }
 
+    // @PutMapping("/{payrollId}")
+    // public ApiResponse<PayRollResponse> updatePayRoll(
+    //         @PathVariable Integer payrollId,
+    //         @Valid @RequestBody PayRollDto dto) {
+            
+    //         return ApiResponse.<PayRollResponse>builder()
+    //             .code(200)
+    //             .status("success")
+    //             .data(payRollService.updatePayRoll(payrollId, dto))
+    //             .build();
+    // }
 
 }

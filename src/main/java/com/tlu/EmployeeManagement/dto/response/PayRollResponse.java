@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
 
 
 
@@ -34,5 +35,7 @@ public class PayRollResponse {
     String status;
 
     String fileUrl;
+
+    LocalDateTime createdAt;
 
 }

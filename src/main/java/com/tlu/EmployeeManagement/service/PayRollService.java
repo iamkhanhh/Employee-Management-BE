@@ -22,7 +22,6 @@ import com.tlu.EmployeeManagement.repository.UserRepository;
 import com.tlu.EmployeeManagement.enums.UserRole;
 import java.util.ArrayList;
 import com.tlu.EmployeeManagement.dto.request.PayRollDto;
-import com.tlu.EmployeeManagement.dto.request.DepartmentPayrollDto;
 import org.springframework.beans.factory.annotation.Value;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -107,62 +106,41 @@ public class PayRollService {
         return salaryPerDay.multiply(totalDeductionDays);
     }
 
-    public PayRollResponse insertPayRoll(PayRollDto dto) {
-        Employee emp = employeeRepository.findById(dto.getEmpId())
-            .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + dto.getEmpId()));
-
-        Integer currentUserId = SecurityUtils.getCurrentUserId();
-        if (currentUserId == null) throw new RuntimeException("Current user not authenticated");
-
-        Employee head = employeeRepository.findByUserId(currentUserId)
-        .orElseThrow(() -> new ResourceNotFoundException("Employee not found with userId: " + currentUserId));
-        if (!head.getDeptId().equals(emp.getDeptId()) || head.getRoleInDept() != RoleInDepartment.HEAD) {
-            throw new RuntimeException("Forbidden: only department head can create payroll for their department");
-        }
-
-        Payroll payroll = new Payroll();
-        payroll.setEmpId(emp.getId());
-        payroll.setAllowance(dto.getAllowance());
-        payroll.setBonus(dto.getBonus());
-        payroll.setDeduction(dto.getDeduction());
-
-        BigDecimal basic = emp.getBasicSalary() != null ? emp.getBasicSalary() : BigDecimal.ZERO;
-        payroll.setStatus(PayrollStatus.PENDING);
-        Payroll saved = payrollRepository.save(payroll);
-        return toPayRollResponse(saved);
-    }
-
-    public List<PayRollResponse> createPayrollByDepartment(DepartmentPayrollDto dto) {
-        List<Employee> employees = employeeRepository.findByDeptId(dto.getDeptId());
-        if (employees.isEmpty()) {
-            throw new ResourceNotFoundException("No employees found for department id: " + dto.getDeptId());
-        }
+    
+    public List<PayRollResponse> createPayrollByDepartment(Integer deptId, List<PayRollDto> dto) {
+        String role = SecurityUtils.getCurrentUserRole();
+        System.out.println("Current user role: " + role);
+        if (!"ADMIN".equals(role) && !"ACCOUNTANT".equals(role)) {
+            throw new RuntimeException("Forbidden: Only ADMIN or ACCOUNTANT can update payroll");
+        }  
         List<PayRollResponse> responses = new ArrayList<>();
-        System.out.println("Creating payroll for department id: " + dto.getDeptId());
-        for (Employee emp : employees) {
-            System.out.println("Processing employee id: " + emp.getId());
-            Payroll payroll = payrollRepository.findLatestByEmpId(emp.getId())
-                    .orElseGet(() -> {
-                        Payroll p = new Payroll();
-                        p.setEmpId(emp.getId());
-                        return p;
-                    });
-            System.out.println(payroll.getId());
-            BigDecimal allowance = payroll.getAllowance() != null ? payroll.getAllowance() : BigDecimal.ZERO;
-            BigDecimal bonus = calculateOvertimeBonus(emp.getId()).add(
-                payroll.getBonus() != null ? payroll.getBonus() : BigDecimal.ZERO
-            );
-            BigDecimal dedFromAttendance = calculationDeduction(emp.getId(), LocalDateTime.now().getMonthValue(), LocalDateTime.now().getYear());
-            BigDecimal deduction = (payroll.getDeduction() != null ? payroll.getDeduction() : BigDecimal.ZERO)
-                    .add(dedFromAttendance != null ? dedFromAttendance : BigDecimal.ZERO);
-
+        for (PayRollDto item: dto){
+            Employee emp = employeeRepository.findById(item.getEmpId())
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + item.getEmpId()));
+            if (!emp.getDeptId().equals(deptId)) {
+                throw new RuntimeException("Employee with id " + item.getEmpId() + " does not belong to department " + deptId);
+            }
+            Payroll payroll = new Payroll();
+            payroll.setEmpId(item.getEmpId());
+            BigDecimal allowance = item.getAllowance() != null ? item.getAllowance() : BigDecimal.ZERO; 
             payroll.setAllowance(allowance);
-            payroll.setBonus(bonus != null ? bonus : BigDecimal.ZERO);
+
+            BigDecimal dtoBonus = item.getBonus() != null ? item.getBonus() : BigDecimal.ZERO;
+            BigDecimal overtimeBonus = calculateOvertimeBonus(emp.getId());
+            BigDecimal bonus = dtoBonus.add(overtimeBonus != null ? overtimeBonus : BigDecimal.ZERO);
+            payroll.setBonus(bonus);
+
+            BigDecimal dtoDeduction = item.getDeduction() != null ? item.getDeduction() : BigDecimal.ZERO;
+            BigDecimal dedFromAttendance = calculationDeduction(emp.getId(), LocalDateTime.now().getMonthValue(), LocalDateTime.now().getYear());
+            BigDecimal deduction = dtoDeduction.add(dedFromAttendance != null ? dedFromAttendance : BigDecimal.ZERO);
             payroll.setDeduction(deduction);
 
             BigDecimal basic = emp.getBasicSalary() != null ? emp.getBasicSalary() : BigDecimal.ZERO;
-            BigDecimal netSalary = basic.add(allowance).add(bonus).subtract(deduction);
+            payroll.setBasicSalary(basic);
+
+            BigDecimal netSalary = basic.add(allowance).add(bonus).subtract(deduction); 
             payroll.setNetSalary(netSalary);
+
             payroll.setStatus(PayrollStatus.APPROVED);
             Payroll saved = payrollRepository.save(payroll);
             responses.add(toPayRollResponse(saved));
@@ -170,15 +148,46 @@ public class PayRollService {
         return responses;
     }
 
+  
+    // public PayRollResponse updatePayRoll(Integer payrollId, PayRollDto dto) {
+    //     String role = SecurityUtils.getCurrentUserRole();
+    //     System.out.println("Current user role: " + UserRole);
+    //     if (!"ADMIN".equals(role) && !"ACCOUNTANT".equals(role)) {
+    //         throw new RuntimeException("Forbidden: Only ADMIN or ACCOUNTANT can update payroll");
+    //     }
+    //     Payroll payroll = payrollRepository.findById(payrollId)
+    //             .orElseThrow(() -> new ResourceNotFoundException("Payroll not found with id: " + payrollId));
+
+    //     Employee emp = employeeRepository.findById(dto.getEmpId())
+    //             .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + dto.getEmpId()));
+
+    //     BigDecimal allowance = dto.getAllowance() != null ? dto.getAllowance() : BigDecimal.ZERO; 
+
+    //     payroll.setAllowance(allowance);
+    //     BigDecimal dtoBonus = dto.getBonus() != null ? dto.getBonus() : BigDecimal.ZERO;
+    //     BigDecimal overtimeBonus = calculateOvertimeBonus(emp.getId());
+    //     BigDecimal bonus = dtoBonus.add(overtimeBonus != null ? overtimeBonus : BigDecimal.ZERO);
+    //     payroll.setBonus(bonus);
 
 
-    public List<PayRollResponse> getPayrollDept(Integer deptId) {
+    //     BigDecimal dtoDeduction = dto.getDeduction() != null ? dto.getDeduction() : BigDecimal.ZERO;
+    //     BigDecimal dedFromAttendance = calculationDeduction(emp.getId(), LocalDateTime.now().getMonthValue(), LocalDateTime.now().getYear());
+    //     BigDecimal deduction = dtoDeduction.add(dedFromAttendance != null ? dedFromAttendance : BigDecimal.ZERO);
+    //     payroll.setDeduction(deduction);
+
+    //     BigDecimal basic = emp.getBasicSalary() != null ? emp.getBasicSalary() : BigDecimal.ZERO;
+    //     BigDecimal netSalary = basic.add(allowance).add(bonus).subtract(deduction);
+    //     payroll.setNetSalary(netSalary);
+
+    //     payroll.setStatus(PayrollStatus.APPROVED);
+    //     Payroll saved = payrollRepository.save(payroll);
+    //     return toPayRollResponse(saved);
+    // }
+
+
+    public List<PayRollResponse> getPayrollDept(Integer deptId, Integer month, Integer year) {
         Integer currentUserId = SecurityUtils.getCurrentUserId();
         if (currentUserId == null) throw new RuntimeException("Current user not authenticated");
-        // var userOpt = userRepository.findById(currentUserId);
-        // if (userOpt.isEmpty() || userOpt.get().getRole() != UserRole.ADMIN) {
-        //     throw new RuntimeException("Forbidden: only admin can view all payrolls");
-        // }
         Employee currentEmp = employeeRepository.findByUserId(currentUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("Current employee not found"));
         if (!deptId.equals(currentEmp.getDeptId())) {
@@ -187,8 +196,14 @@ public class PayRollService {
         if (currentEmp.getRoleInDept() != RoleInDepartment.HEAD) {
             throw new RuntimeException("Forbidden: Only department head can view summary");
         }
-      
+        // tu deptid -> list employee -> payroll co employeeid
         List<Payroll> payrolls = payrollRepository.findPayrollsByDepartment(deptId);
+        payrolls = payrolls.stream()
+        .filter(p ->
+                p.getCreatedAt().getMonthValue() == month &&
+                p.getCreatedAt().getYear() == year
+        )   
+        .collect(Collectors.toList());
         return payrolls.stream()
                 .map(this::toPayRollResponse)
                 .collect(Collectors.toList());
@@ -213,7 +228,7 @@ public class PayRollService {
         Integer currentUserId = SecurityUtils.getCurrentUserId();
         if (currentUserId == null) throw new RuntimeException("Current user not authenticated");
         checkViewPermission(empId, currentUserId);
-        return payrollRepository.findByEmpId(empId)
+        return payrollRepository.findLatestByEmpId(empId)
                 .stream().map(this::toPayRollResponse).collect(Collectors.toList());
     }
 
@@ -255,6 +270,7 @@ public class PayRollService {
         response.setDeduction(payroll.getDeduction() != null ? payroll.getDeduction().doubleValue() : 0.0);
         response.setNetSalary(payroll.getNetSalary() != null ? payroll.getNetSalary().doubleValue() : 0.0);
         response.setStatus(payroll.getStatus().name());
+        response.setCreatedAt(payroll.getCreatedAt());
         if (payroll.getFileUrl() != null && !payroll.getFileUrl().isBlank()) {
             try {
                 String presigned = s3Service.getS3Url(payroll.getFileUrl());
