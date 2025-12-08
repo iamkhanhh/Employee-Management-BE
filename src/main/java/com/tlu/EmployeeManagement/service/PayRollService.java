@@ -20,14 +20,19 @@ import com.tlu.EmployeeManagement.entity.Attendance;
 import com.tlu.EmployeeManagement.repository.AttendanceRepository;
 import com.tlu.EmployeeManagement.repository.UserRepository;
 import com.tlu.EmployeeManagement.enums.UserRole;
+import com.tlu.EmployeeManagement.entity.User;
+import com.tlu.EmployeeManagement.service.EmailService;;
+import java.util.Map;
 import java.util.ArrayList;
 import com.tlu.EmployeeManagement.dto.request.PayRollDto;
+import com.tlu.EmployeeManagement.dto.request.PayRollUpdateDto;
 import org.springframework.beans.factory.annotation.Value;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalTime; 
 import java.time.YearMonth;
+import java.util.HashMap;
 
 
 import lombok.AccessLevel;
@@ -46,6 +51,7 @@ public class PayRollService {
     final DepartmentRepository departmentRepository;
     final AttendanceRepository attendanceRepository;
     final UserRepository userRepository;
+    final EmailService EmailService;
 
     @Value("${attendance.workStartTime}")  
     private String workStartTimeConfig;
@@ -120,6 +126,9 @@ public class PayRollService {
             if (!emp.getDeptId().equals(deptId)) {
                 throw new RuntimeException("Employee with id " + item.getEmpId() + " does not belong to department " + deptId);
             }
+            User user = userRepository.findById(emp.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + emp.getUserId()));
+            
             Payroll payroll = new Payroll();
             payroll.setEmpId(item.getEmpId());
             BigDecimal allowance = item.getAllowance() != null ? item.getAllowance() : BigDecimal.ZERO; 
@@ -144,46 +153,61 @@ public class PayRollService {
             payroll.setStatus(PayrollStatus.APPROVED);
             Payroll saved = payrollRepository.save(payroll);
             responses.add(toPayRollResponse(saved));
+
+            Map<String, Object> emailData = new HashMap<>();
+            emailData.put("empName", emp.getFullName());
+            System.out.println("Preparing to send email to: " + emp.getFullName() + " at " + user.getEmail());
+            emailData.put("basicSalary", basic);
+            emailData.put("allowance", allowance);
+            emailData.put("bonus", bonus);
+            emailData.put("deduction", deduction);
+            emailData.put("netSalary", netSalary);
+            emailData.put("month", LocalDateTime.now().getMonthValue());
+            emailData.put("year", LocalDateTime.now().getYear());
+            emailData.put("empPosition", emp.getRoleInDept() != null ? emp.getRoleInDept().name() : "");
+            emailData.put("empDepartment", departmentRepository.findById(emp.getDeptId())
+                .map(Department::getDeptName)
+                .orElse(""));
+           
+            EmailService.sendPayrollEmail(user.getEmail(), emailData);
         }
         return responses;
     }
 
     
   
-    // public PayRollResponse updatePayRoll(Integer payrollId, PayRollDto dto) {
-    //     String role = SecurityUtils.getCurrentUserRole();
-    //     System.out.println("Current user role: " + UserRole);
-    //     if (!"ADMIN".equals(role) && !"ACCOUNTANT".equals(role)) {
-    //         throw new RuntimeException("Forbidden: Only ADMIN or ACCOUNTANT can update payroll");
-    //     }
-    //     Payroll payroll = payrollRepository.findById(payrollId)
-    //             .orElseThrow(() -> new ResourceNotFoundException("Payroll not found with id: " + payrollId));
+    public PayRollResponse updatePayRoll(Integer payrollId, PayRollUpdateDto dto) {
+        String role = SecurityUtils.getCurrentUserRole();
+        if (!"ADMIN".equals(role) && !"ACCOUNTANT".equals(role)) {
+            throw new RuntimeException("Forbidden: Only ADMIN or ACCOUNTANT can update payroll");
+        }
+        Payroll payroll = payrollRepository.findById(payrollId)
+                .orElseThrow(() -> new ResourceNotFoundException("Payroll not found with id: " + payrollId));
 
-    //     Employee emp = employeeRepository.findById(dto.getEmpId())
-    //             .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + dto.getEmpId()));
+        Employee emp = employeeRepository.findById(payroll.getEmpId())
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + payroll.getEmpId()));
+        BigDecimal allowance = dto.getAllowance() != null ? dto.getAllowance() : BigDecimal.ZERO; 
 
-    //     BigDecimal allowance = dto.getAllowance() != null ? dto.getAllowance() : BigDecimal.ZERO; 
-
-    //     payroll.setAllowance(allowance);
-    //     BigDecimal dtoBonus = dto.getBonus() != null ? dto.getBonus() : BigDecimal.ZERO;
-    //     BigDecimal overtimeBonus = calculateOvertimeBonus(emp.getId());
-    //     BigDecimal bonus = dtoBonus.add(overtimeBonus != null ? overtimeBonus : BigDecimal.ZERO);
-    //     payroll.setBonus(bonus);
+        payroll.setAllowance(allowance);
+        BigDecimal dtoBonus = dto.getBonus() != null ? dto.getBonus() : BigDecimal.ZERO;
+        BigDecimal overtimeBonus = calculateOvertimeBonus(emp.getId());
+        BigDecimal bonus = dtoBonus.add(overtimeBonus != null ? overtimeBonus : BigDecimal.ZERO);
+        payroll.setBonus(bonus);
 
 
-    //     BigDecimal dtoDeduction = dto.getDeduction() != null ? dto.getDeduction() : BigDecimal.ZERO;
-    //     BigDecimal dedFromAttendance = calculationDeduction(emp.getId(), LocalDateTime.now().getMonthValue(), LocalDateTime.now().getYear());
-    //     BigDecimal deduction = dtoDeduction.add(dedFromAttendance != null ? dedFromAttendance : BigDecimal.ZERO);
-    //     payroll.setDeduction(deduction);
+        BigDecimal dtoDeduction = dto.getDeduction() != null ? dto.getDeduction() : BigDecimal.ZERO;
+        BigDecimal dedFromAttendance = calculationDeduction(emp.getId(), LocalDateTime.now().getMonthValue(), LocalDateTime.now().getYear());
+        BigDecimal deduction = dtoDeduction.add(dedFromAttendance != null ? dedFromAttendance : BigDecimal.ZERO);
+        payroll.setDeduction(deduction);
 
-    //     BigDecimal basic = emp.getBasicSalary() != null ? emp.getBasicSalary() : BigDecimal.ZERO;
-    //     BigDecimal netSalary = basic.add(allowance).add(bonus).subtract(deduction);
-    //     payroll.setNetSalary(netSalary);
+        BigDecimal basic = emp.getBasicSalary() != null ? emp.getBasicSalary() : BigDecimal.ZERO;
+        BigDecimal netSalary = basic.add(allowance).add(bonus).subtract(deduction);
+        payroll.setNetSalary(netSalary);
 
-    //     payroll.setStatus(PayrollStatus.APPROVED);
-    //     Payroll saved = payrollRepository.save(payroll);
-    //     return toPayRollResponse(saved);
-    // }
+        payroll.setStatus(PayrollStatus.APPROVED);
+        Payroll saved = payrollRepository.save(payroll);
+        return toPayRollResponse(saved);
+    }
 
 
    

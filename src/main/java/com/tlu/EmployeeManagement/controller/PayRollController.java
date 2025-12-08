@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.tlu.EmployeeManagement.dto.request.PayRollDto;
+import com.tlu.EmployeeManagement.dto.request.PayRollUpdateDto;
 import com.tlu.EmployeeManagement.dto.request.DepartmentPayrollDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -75,18 +76,17 @@ public class PayRollController {
                 .build();
     }
 
-
-
-    // @PutMapping("/{payrollId}")
-    // public ApiResponse<PayRollResponse> updatePayRoll(
-    //         @PathVariable Integer payrollId,
-    //         @Valid @RequestBody PayRollDto dto) {
+    @Operation(summary = "Update payroll", description = "Update an existing payroll record by its ID")
+    @PutMapping("/{payrollId}")
+    public ApiResponse<PayRollResponse> updatePayRoll(
+            @PathVariable Integer payrollId,
+            @Valid @RequestBody PayRollUpdateDto dto) {
             
-    //         return ApiResponse.<PayRollResponse>builder()
-    //             .code(200)
-    //             .status("success")
-    //             .data(payRollService.updatePayRoll(payrollId, dto))
-    //             .build();
-    // }
+            return ApiResponse.<PayRollResponse>builder()
+                .code(200)
+                .status("success")
+                .data(payRollService.updatePayRoll(payrollId, dto))
+                .build();
+    }
 
 }
