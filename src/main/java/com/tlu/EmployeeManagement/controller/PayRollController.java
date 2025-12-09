@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.tlu.EmployeeManagement.dto.request.PayRollDto;
+import com.tlu.EmployeeManagement.dto.request.PayRollUpdateDto;
 import com.tlu.EmployeeManagement.dto.request.DepartmentPayrollDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,6 +23,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import com.tlu.EmployeeManagement.enums.PayrollStatus;
 
 
 @Tag(name = "Payroll", description = "APIs for managing employee payrolls")
@@ -54,7 +56,7 @@ public class PayRollController {
             @RequestParam(required = false) Integer month,
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Integer deptId,
-            @RequestParam(required = false) String status
+            @RequestParam(required = false) PayrollStatus status
     ) {
         return ApiResponse.<List<PayRollResponse>>builder()
                 .code(200)
@@ -75,18 +77,17 @@ public class PayRollController {
                 .build();
     }
 
-
-
-    // @PutMapping("/{payrollId}")
-    // public ApiResponse<PayRollResponse> updatePayRoll(
-    //         @PathVariable Integer payrollId,
-    //         @Valid @RequestBody PayRollDto dto) {
+    @Operation(summary = "Update payroll", description = "Update an existing payroll record by its ID")
+    @PutMapping("/{payrollId}")
+    public ApiResponse<PayRollResponse> updatePayRoll(
+            @PathVariable Integer payrollId,
+            @Valid @RequestBody PayRollUpdateDto dto) {
             
-    //         return ApiResponse.<PayRollResponse>builder()
-    //             .code(200)
-    //             .status("success")
-    //             .data(payRollService.updatePayRoll(payrollId, dto))
-    //             .build();
-    // }
+            return ApiResponse.<PayRollResponse>builder()
+                .code(200)
+                .status("success")
+                .data(payRollService.updatePayRoll(payrollId, dto))
+                .build();
+    }
 
 }

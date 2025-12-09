@@ -20,6 +20,7 @@ import com.tlu.EmployeeManagement.dto.response.ApiResponse;
 import com.tlu.EmployeeManagement.dto.response.LeaveRequestWithEmployeeDto;
 import java.util.List;
 import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 import com.tlu.EmployeeManagement.enums.LeaveStatus;
 import com.tlu.EmployeeManagement.entity.LeaveRequest;
 import com.tlu.EmployeeManagement.dto.request.LeaveRequestUpdateDto;
@@ -164,21 +165,45 @@ public class LeaveRequestController {
                 .build();
     }
 
-    @Operation(summary = "Get leave requests by department", description = "Retrieve all leave requests for a specific department")
+    @Operation(summary = "Get leave requests by department", description = "Retrieve leave requests for a department with optional date range and status filters")
     @GetMapping("/department/{deptId}")
     public ApiResponse<List<LeaveRequestWithEmployeeDto>> listByDepartment(
-            @Parameter(description = "Department ID", required = true, example = "1") @PathVariable Integer deptId,
-            @RequestParam(required = false) Integer month,
-            @RequestParam(required = false) Integer year,
+            @Parameter(
+                description = "Department ID",
+                required = true,
+                example = "1"
+            )
+            @PathVariable Integer deptId,
+
+            @Parameter(
+                description = "Filter by start date (format: dd/MM/yyyy)",
+                example = "01/01/2024"
+            )
+            @DateTimeFormat(pattern = "dd/MM/yyyy")
+            @RequestParam(required = false) LocalDate startDate,
+
+            @Parameter(
+                description = "Filter by end date (format: dd/MM/yyyy)",
+                example = "31/12/2024"
+            )
+            @DateTimeFormat(pattern = "dd/MM/yyyy")
+            @RequestParam(required = false) LocalDate endDate,
+
+            @Parameter(
+                description = "Filter by leave status",
+                example = "APPROVED"
+            )
             @RequestParam(required = false) LeaveStatus status
-            ) {
-        var list = leaveRequestService.listByDepartment(deptId,month,year,status);
+    ) {
+        var list = leaveRequestService.listByDepartment(deptId, startDate, endDate, status);
+
         return ApiResponse.<List<LeaveRequestWithEmployeeDto>>builder()
                 .code(200)
                 .status("success")
                 .data(list)
                 .build();
     }
+
 
     @Operation(summary = "Update leave request", description = "Update an existing leave request. Only pending requests can be updated.")
     @PutMapping("/{id}")
