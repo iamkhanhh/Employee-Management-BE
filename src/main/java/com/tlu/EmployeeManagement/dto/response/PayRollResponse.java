@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 
@@ -47,5 +48,7 @@ public class PayRollResponse {
 
     @Schema(description = "URL to payroll file/document", example = "https://example.com/payrolls/file.pdf")
     String fileUrl;
+
+    LocalDateTime createdAt;
 
 }

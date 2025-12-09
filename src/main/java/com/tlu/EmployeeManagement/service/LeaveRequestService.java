@@ -25,6 +25,7 @@ import com.tlu.EmployeeManagement.enums.RoleInDepartment;
 import java.util.ArrayList;
 import java.util.List;
 import com.tlu.EmployeeManagement.dto.response.LeaveSummaryResponse;
+import java.util.stream.Collectors;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -51,7 +52,7 @@ public class LeaveRequestService {
     }
 
   
-    public List<LeaveRequestWithEmployeeDto> listByDepartment(Integer deptId) {
+    public List<LeaveRequestWithEmployeeDto> listByDepartment(Integer deptId, Integer month, Integer year, LeaveStatus status) {
         Integer currentUserId = SecurityUtils.getCurrentUserId();
         if (currentUserId == null) throw new RuntimeException("Unauthenticated");
 
@@ -67,6 +68,25 @@ public class LeaveRequestService {
         }
 
         var leaves = leaveRequestRepository.findByDepartmentId(deptId);
+        if (month != null) {
+        leaves = leaves.stream()
+                .filter(lr -> lr.getCreatedAt() != null &&
+                              lr.getCreatedAt().getMonthValue() == month)
+                .collect(Collectors.toList());
+        }
+
+        if (year != null) {
+            leaves = leaves.stream()
+                    .filter(lr -> lr.getCreatedAt() != null &&
+                                lr.getCreatedAt().getYear() == year)
+                    .collect(Collectors.toList());
+        }
+
+        if (status != null) {
+            leaves = leaves.stream()
+                    .filter(lr -> lr.getStatus() == status)
+                    .collect(Collectors.toList());
+        }
         List<LeaveRequestWithEmployeeDto> dtoList = new ArrayList<>();
         for (LeaveRequest lr : leaves) {
             LeaveRequestWithEmployeeDto dto = new LeaveRequestWithEmployeeDto();

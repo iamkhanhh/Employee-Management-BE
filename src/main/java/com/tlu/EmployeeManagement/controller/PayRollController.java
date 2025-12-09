@@ -18,9 +18,11 @@ import com.tlu.EmployeeManagement.dto.request.PayRollDto;
 import com.tlu.EmployeeManagement.dto.request.DepartmentPayrollDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+
 
 @Tag(name = "Payroll", description = "APIs for managing employee payrolls")
 @RestController
@@ -31,9 +33,11 @@ public class PayRollController {
 
     @Operation(summary = "Create payroll for department", description = "Create payroll records for all employees in a specific department")
     @PostMapping
-    public ApiResponse<List<PayRollResponse>> createPayroll(@Valid @RequestBody DepartmentPayrollDto dto) {
+    public ApiResponse<List<PayRollResponse>> createPayroll(
+        @RequestParam Integer deptId,
+        @Valid @RequestBody List<PayRollDto> dto) {
 
-        List<PayRollResponse> createdList = payRollService.createPayrollByDepartment(dto);
+        List<PayRollResponse> createdList = payRollService.createPayrollByDepartment(deptId,dto);
 
         return ApiResponse.<List<PayRollResponse>>builder()
                 .code(201)
@@ -44,25 +48,13 @@ public class PayRollController {
     }
 
 
-    @Operation(summary = "Create single payroll", description = "Create a payroll record for a single employee with allowances, bonuses, and deductions")
-    @PostMapping("/single")
-    public ApiResponse<PayRollResponse> createSinglePayroll(@Valid @RequestBody PayRollDto dto) {
-        PayRollResponse created = payRollService.insertPayRoll(dto);
-        return ApiResponse.<PayRollResponse>builder()
-                .code(201)
-                .status("success")
-                .message("Payroll created successfully")
-                .data(created)
-                .build();
-    }
-
     @Operation(summary = "Filter payrolls", description = "Filter payroll records by month, year, department, and status")
     @GetMapping("")
     public ApiResponse<List<PayRollResponse>> filterPayroll(
-            @Parameter(description = "Month (1-12)", example = "12") @RequestParam(required = false) Integer month,
-            @Parameter(description = "Year", example = "2025") @RequestParam(required = false) Integer year,
-            @Parameter(description = "Department ID", example = "1") @RequestParam(required = false) Integer deptId,
-            @Parameter(description = "Payroll status", example = "PAID") @RequestParam(required = false) String status
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer deptId,
+            @RequestParam(required = false) String status
     ) {
         return ApiResponse.<List<PayRollResponse>>builder()
                 .code(200)
@@ -83,16 +75,18 @@ public class PayRollController {
                 .build();
     }
 
-    @Operation(summary = "Get payrolls by department", description = "Retrieve all payroll records for a specific department")
-    @GetMapping("/department/{deptId}")
-    public ApiResponse<List<PayRollResponse>> getPayrollByDepartment(
-            @Parameter(description = "Department ID", example = "1") @PathVariable Integer deptId) {
-        return ApiResponse.<List<PayRollResponse>>builder()
-                .code(200)
-                .status("success")
-                .data(payRollService.getPayrollDept(deptId))
-                .build();
-    }
 
+
+    // @PutMapping("/{payrollId}")
+    // public ApiResponse<PayRollResponse> updatePayRoll(
+    //         @PathVariable Integer payrollId,
+    //         @Valid @RequestBody PayRollDto dto) {
+            
+    //         return ApiResponse.<PayRollResponse>builder()
+    //             .code(200)
+    //             .status("success")
+    //             .data(payRollService.updatePayRoll(payrollId, dto))
+    //             .build();
+    // }
 
 }
