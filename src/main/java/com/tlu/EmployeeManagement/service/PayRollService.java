@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import com.tlu.EmployeeManagement.dto.request.PayRollDto;
 import com.tlu.EmployeeManagement.dto.request.PayRollUpdateDto;
+import com.tlu.EmployeeManagement.enums.PayrollStatus;
 import org.springframework.beans.factory.annotation.Value;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -212,20 +213,51 @@ public class PayRollService {
 
    
 
-    public List<PayRollResponse> filterPayroll(Integer month, Integer year, Integer deptId, String status) {
-        PayrollStatus st = null;
-        if (status != null && !status.isBlank()) {
-            try {
-                st = PayrollStatus.valueOf(status.trim());
-            } catch (IllegalArgumentException ex) {
-                st = null;
+    public List<PayRollResponse> filterPayroll(Integer month, Integer year, Integer deptId, PayrollStatus status) {
+        Integer currentUserId = SecurityUtils.getCurrentUserId();
+        if (currentUserId == null)
+            throw new RuntimeException("Current user not authenticated");
+        String role = SecurityUtils.getCurrentUserRole();
+        boolean isAdmin = "ADMIN".equals(role);
+        boolean isAccountant = "ACCOUNTANT".equals(role);
+        if (!(isAdmin || isAccountant)) {
+            Employee currentEmp = employeeRepository.findByUserId(currentUserId)
+                    .orElseThrow(() -> new RuntimeException("Current employee not found"));
+            boolean isHead = currentEmp.getRoleInDept() == RoleInDepartment.HEAD;
+            if (!isHead) {
+                throw new RuntimeException("Forbidden: Only ADMIN, ACCOUNTANT, or DEPARTMENT HEAD can view payrolls");
+            }
+            Integer userDeptId = currentEmp.getDeptId();
+            if (deptId != null && !deptId.equals(userDeptId)) {
+                throw new RuntimeException("Forbidden: Department HEAD can only view their own department");
+            }
+            if (deptId == null) {
+                deptId = userDeptId;
             }
         }
-        return payrollRepository.filterPayroll(month, year, deptId, st)
+        List<Payroll> payrolls = payrollRepository.findAll();
+        Map<Integer, Employee> employees = employeeRepository.findAll()
                 .stream()
+                .collect(Collectors.toMap(Employee::getId, e -> e));
+        final Integer finalDeptId = deptId;
+        List<Payroll> filtered = payrolls.stream()
+                .filter(p -> month == null || p.getCreatedAt().getMonthValue() == month)
+                .filter(p -> year == null || p.getCreatedAt().getYear() == year)
+                .filter(p -> {
+                    if (finalDeptId == null) return true;
+                    Employee emp = employees.get(p.getEmpId());
+                    return emp != null && finalDeptId.equals(emp.getDeptId());
+                })
+                .filter(p -> status == null || p.getStatus() == status)
+                .collect(Collectors.toList());
+
+        return filtered.stream()
                 .map(this::toPayRollResponse)
                 .collect(Collectors.toList());
     }
+
+
+
 
     public List<PayRollResponse> getByEmployee(Integer empId) {
         Integer currentUserId = SecurityUtils.getCurrentUserId();

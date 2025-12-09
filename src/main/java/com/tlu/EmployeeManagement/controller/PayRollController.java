@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import com.tlu.EmployeeManagement.enums.PayrollStatus;
 
 
 @Tag(name = "Payroll", description = "APIs for managing employee payrolls")
@@ -55,7 +56,7 @@ public class PayRollController {
             @RequestParam(required = false) Integer month,
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Integer deptId,
-            @RequestParam(required = false) String status
+            @RequestParam(required = false) PayrollStatus status
     ) {
         return ApiResponse.<List<PayRollResponse>>builder()
                 .code(200)
