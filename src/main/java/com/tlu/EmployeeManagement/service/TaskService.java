@@ -25,6 +25,7 @@ import com.tlu.EmployeeManagement.repository.TaskAssignmentRepository;
 import com.tlu.EmployeeManagement.repository.TaskRepository;
 import com.tlu.EmployeeManagement.repository.EmployeeRepository;    
 import com.tlu.EmployeeManagement.repository.DepartmentRepository;
+import java.time.LocalDate;
 
 import lombok.RequiredArgsConstructor;
 
@@ -80,7 +81,7 @@ public class TaskService {
 
 
         @Transactional(readOnly = true)
-        public List<TaskResponse> getTasksForCurrentUser(Integer userId, Integer month, Integer year, TaskStatus status) {
+        public List<TaskResponse> getTasksForCurrentUser(Integer userId, LocalDate startDate, LocalDate endDate, TaskStatus status) {
                 if (userId == null) throw new RuntimeException("Unauthenticated");
 
                 Employee emp = employeeRepository.findByUserId(userId)
@@ -96,15 +97,25 @@ public class TaskService {
                                 .filter(t -> t != null)
                                 .collect(Collectors.toList());
                 }
-                if (month != null) {
-                        tasks = tasks.stream()
-                                .filter(t -> t.getCreatedAt().getMonthValue() == month)
-                                .collect(Collectors.toList());
+
+                if (startDate != null && endDate == null) {
+                endDate = LocalDate.now();
                 }
-                if (year != null) {
-                        tasks = tasks.stream()
-                                .filter(t -> t.getCreatedAt().getYear() == year)
-                                .collect(Collectors.toList());
+
+                if (startDate != null) {
+                LocalDate finalEndDate = endDate;
+                tasks = tasks.stream()
+                        .filter(t -> {
+                                if (t.getCreatedAt() == null) return false;
+
+                                LocalDate created = t.getCreatedAt().toLocalDate(); 
+
+                                boolean afterStart = !created.isBefore(startDate); 
+                                boolean beforeEnd = finalEndDate == null || !created.isAfter(finalEndDate); 
+
+                                return afterStart && beforeEnd;
+                        })
+                        .collect(Collectors.toList());
                 }
                 if (status != null) {
                         tasks = tasks.stream()
