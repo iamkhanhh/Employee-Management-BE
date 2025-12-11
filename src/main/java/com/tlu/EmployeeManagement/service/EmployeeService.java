@@ -1,6 +1,7 @@
 package com.tlu.EmployeeManagement.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -115,8 +116,23 @@ public class EmployeeService {
             .orElseThrow(() -> new RuntimeException("User not found with id: " + createDto.getUserId()));
 
         // Validate department exists
-        departmentRepository.findById(createDto.getDeptId())
+        Department dept = departmentRepository.findById(createDto.getDeptId())
             .orElseThrow(() -> new RuntimeException("Department not found with id: " + createDto.getDeptId()));
+
+        // Determine the role for the new employee
+        RoleInDepartment roleInDept = createDto.getRoleInDept() != null ? createDto.getRoleInDept() : RoleInDepartment.STAFF;
+
+        // Check if department already has a HEAD when trying to assign HEAD role
+        if (roleInDept == RoleInDepartment.HEAD) {
+            Optional<Employee> existingHead = employeeRepository.findFirstByDeptIdAndRoleInDept(
+                createDto.getDeptId(),
+                RoleInDepartment.HEAD
+            );
+
+            if (existingHead.isPresent() && !existingHead.get().getIsDeleted()) {
+                throw new RuntimeException("Department already has a head employee");
+            }
+        }
 
         Employee employee = new Employee();
         employee.setUserId(createDto.getUserId());
@@ -128,9 +144,9 @@ public class EmployeeService {
         employee.setAddress(createDto.getAddress());
         employee.setHireDate(createDto.getHireDate());
         employee.setStatus(createDto.getStatus() != null ? createDto.getStatus() : EmployeeStatus.ACTIVE);
-        employee.setRoleInDept(createDto.getRoleInDept() != null ? createDto.getRoleInDept() : RoleInDepartment.STAFF);
         employee.setBasicSalary(createDto.getBasicSalary());
         employee.setIsDeleted(false);
+        employee.setRoleInDept(roleInDept);
 
         Employee savedEmployee = employeeRepository.save(employee);
         return toEmployeeResponse(savedEmployee);
@@ -173,6 +189,24 @@ public class EmployeeService {
             employee.setStatus(updateDto.getStatus());
         }
         if (updateDto.getRoleInDept() != null) {
+            // Check if trying to change role to HEAD
+            if (updateDto.getRoleInDept() == RoleInDepartment.HEAD &&
+                employee.getRoleInDept() != RoleInDepartment.HEAD) {
+
+                // Use the current or new department ID
+                Integer targetDeptId = updateDto.getDeptId() != null ? updateDto.getDeptId() : employee.getDeptId();
+
+                Optional<Employee> existingHead = employeeRepository.findFirstByDeptIdAndRoleInDept(
+                    targetDeptId,
+                    RoleInDepartment.HEAD
+                );
+
+                if (existingHead.isPresent() &&
+                    !existingHead.get().getIsDeleted() &&
+                    !existingHead.get().getId().equals(employee.getId())) {
+                    throw new RuntimeException("Department already has a head employee");
+                }
+            }
             employee.setRoleInDept(updateDto.getRoleInDept());
         }
 
