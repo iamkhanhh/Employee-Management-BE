@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.tlu.EmployeeManagement.dto.response.LeaveSummaryResponse;
 import java.util.stream.Collectors;
+import java.time.Duration;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -52,7 +53,7 @@ public class LeaveRequestService {
     }
 
   
-    public List<LeaveRequestWithEmployeeDto> listByDepartment(Integer deptId, Integer month, Integer year, LeaveStatus status) {
+    public List<LeaveRequestWithEmployeeDto> listByDepartment(Integer deptId, LocalDate startDate, LocalDate endDate, LeaveStatus status) {
         Integer currentUserId = SecurityUtils.getCurrentUserId();
         if (currentUserId == null) throw new RuntimeException("Unauthenticated");
 
@@ -68,17 +69,25 @@ public class LeaveRequestService {
         }
 
         var leaves = leaveRequestRepository.findByDepartmentId(deptId);
-        if (month != null) {
-        leaves = leaves.stream()
-                .filter(lr -> lr.getCreatedAt() != null &&
-                              lr.getCreatedAt().getMonthValue() == month)
-                .collect(Collectors.toList());
+        
+      
+        if (startDate != null && endDate == null) {
+            endDate = LocalDate.now();
         }
 
-        if (year != null) {
+        if (startDate != null) {
+            LocalDate finalEndDate = endDate;
             leaves = leaves.stream()
-                    .filter(lr -> lr.getCreatedAt() != null &&
-                                lr.getCreatedAt().getYear() == year)
+                    .filter(lr -> {
+                        if (lr.getCreatedAt() == null) return false;
+
+                        LocalDate created = lr.getCreatedAt().toLocalDate(); 
+
+                        boolean afterStart = !created.isBefore(startDate); 
+                        boolean beforeEnd = finalEndDate == null || !created.isAfter(finalEndDate); 
+
+                        return afterStart && beforeEnd;
+                    })
                     .collect(Collectors.toList());
         }
 

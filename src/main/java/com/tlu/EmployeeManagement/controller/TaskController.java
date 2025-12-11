@@ -17,6 +17,9 @@ import org.springframework.http.ResponseEntity;
 import com.tlu.EmployeeManagement.util.SecurityUtils;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import com.tlu.EmployeeManagement.enums.TaskStatus;
 
 
@@ -43,16 +46,29 @@ public class TaskController {
                 .build();
     }
 
-    @Operation(summary = "Get current user's tasks", description = "Retrieve all tasks assigned to the currently authenticated user")
+    @Operation(summary = "Get current user's tasks", description = "Retrieve all tasks assigned to the currently authenticated user with optional filters")
     @GetMapping("/me")
     public ApiResponse<List<TaskResponse>> myTasks(
-            @RequestParam(required = false) Integer month,
-            @RequestParam(required = false) Integer year,
+          @Parameter(
+                description = "Filter by start date (format: dd/MM/yyyy)",
+                example = "01/01/2024"
+            )
+            @DateTimeFormat(pattern = "dd/MM/yyyy")
+            @RequestParam(required = false) LocalDate startDate,
+
+            @Parameter(
+                description = "Filter by end date (format: dd/MM/yyyy)",
+                example = "31/12/2024"
+            )
+            @DateTimeFormat(pattern = "dd/MM/yyyy")
+            @RequestParam(required = false) LocalDate endDate,
+
+            @Parameter(description = "Filter by task status", example = "IN_PROGRESS")
             @RequestParam(required = false) TaskStatus status
-    ) {
+    ){
         Integer userId = SecurityUtils.getCurrentUserId();
 
-        List<TaskResponse> tasks = taskService.getTasksForCurrentUser(userId, month, year, status);
+        List<TaskResponse> tasks = taskService.getTasksForCurrentUser(userId, startDate, endDate, status);
 
         return ApiResponse.<List<TaskResponse>>builder()
                 .code(200)
@@ -60,7 +76,7 @@ public class TaskController {
                 .data(tasks)
                 .build();
     }
-
+    
 
     @Operation(summary = "Update task status", description = "Update the status of a task (e.g., from IN_PROGRESS to COMPLETED)")
     @PatchMapping("/{taskId}/status")
@@ -69,7 +85,6 @@ public class TaskController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Task status update data", required = true)
             @Valid @RequestBody TaskStatusUpdateDto dto) {
         Integer userId = SecurityUtils.getCurrentUserId();
-        System.out.println("Updating status for userId: " + userId);
         TaskResponse updated = taskService.updateTaskStatus(taskId, dto.getStatus(), userId);
         return ApiResponse.<TaskResponse>builder().code(200).status("success").data(updated).build();
     }
