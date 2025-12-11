@@ -2,6 +2,7 @@ package com.tlu.EmployeeManagement.dto.response;
 
 import java.math.BigDecimal;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,14 +13,19 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Response object containing score details for a specific KPI criteria in an employee review")
 public class EmployeeReviewScoreDto {
 
+    @Schema(description = "KPI criteria ID", example = "1")
     Integer criteriaId;
 
+    @Schema(description = "Name of the KPI criteria", example = "Work Quality")
     String criteriaName;
 
+    @Schema(description = "Weight/importance of this criteria (0-1)", example = "0.30")
     BigDecimal weight;
 
+    @Schema(description = "Score value for this criteria", example = "4.0")
     BigDecimal scoreValue;
 
     public static Builder builder() {

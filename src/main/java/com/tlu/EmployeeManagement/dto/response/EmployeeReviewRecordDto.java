@@ -3,6 +3,7 @@ package com.tlu.EmployeeManagement.dto.response;
 import java.math.BigDecimal;
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,23 +14,33 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Response object containing employee performance review record with department information")
 public class EmployeeReviewRecordDto {
+    @Schema(description = "Unique identifier of the review record", example = "1")
     Integer id;
 
+    @Schema(description = "Employee ID being reviewed", example = "123")
     Integer empId;
 
+    @Schema(description = "Full name of the employee", example = "Nguyễn Văn A")
     String empName;
 
+    @Schema(description = "Department ID of the employee", example = "1")
     Integer deptId;
 
+    @Schema(description = "Department name of the employee", example = "Phòng Nhân Sự")
     String deptName;
 
+    @Schema(description = "List of scores for each KPI criteria")
     List<EmployeeReviewScoreDto> scores;
 
+    @Schema(description = "Calculated average score", example = "8.5")
     BigDecimal averageScore;
 
+    @Schema(description = "Final performance rating", example = "EXCELLENT")
     String finalRating;
 
+    @Schema(description = "Additional comments from the reviewer", example = "Outstanding performance this quarter")
     String comment;
 
     public static Builder builder() {

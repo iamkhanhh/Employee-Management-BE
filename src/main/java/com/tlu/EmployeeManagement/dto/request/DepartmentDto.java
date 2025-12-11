@@ -1,5 +1,6 @@
 package com.tlu.EmployeeManagement.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
@@ -12,7 +13,9 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Data Transfer Object for creating or updating a department")
 public class DepartmentDto {
+    @Schema(description = "Name of the department", example = "Phòng Nhân Sự", required = true)
     @NotBlank(message = "Department name is required")
     String deptName;
 

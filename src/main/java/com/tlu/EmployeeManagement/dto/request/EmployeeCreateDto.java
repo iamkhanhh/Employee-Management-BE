@@ -23,39 +23,49 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Data transfer object for creating a new employee")
 public class EmployeeCreateDto {
     @NotNull(message = "User ID is required")
+    @Schema(description = "ID of the user account associated with this employee", example = "1", required = true)
     Integer userId;
 
     @NotNull(message = "Department ID is required")
+    @Schema(description = "ID of the department this employee belongs to", example = "1", required = true)
     Integer deptId;
 
     @NotBlank(message = "Full name is required")
+    @Schema(description = "Full name of the employee", example = "Nguyen Van A", required = true)
     String fullName;
 
     @NotNull(message = "Gender is required")
+    @Schema(description = "Gender of the employee (MALE/FEMALE)", example = "MALE", required = true)
     Gender gender;
 
     @NotNull(message = "Date of birth is required")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-    @Schema(description = "Date of birth", example = "28/11/2000", type = "string", pattern = "dd/MM/yyyy")
+    @Schema(description = "Date of birth", example = "28/11/2000", type = "string", pattern = "dd/MM/yyyy", required = true)
     LocalDate dob;
 
     @Pattern(regexp = "^[0-9]{10,20}$", message = "Phone number must be between 10 and 20 digits")
+    @Schema(description = "Phone number (10-20 digits)", example = "0123456789")
     String phoneNumber;
 
+    @Schema(description = "Residential address", example = "123 Main St, Hanoi")
     String address;
 
     @NotNull(message = "Hire date is required")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-    @Schema(description = "Hire date", example = "01/01/2025", type = "string", pattern = "dd/MM/yyyy")
+    @Schema(description = "Hire date", example = "01/01/2025", type = "string", pattern = "dd/MM/yyyy", required = true)
     LocalDate hireDate;
 
+    @Schema(description = "Employment status (ACTIVE/ON_LEAVE/TERMINATED). Defaults to ACTIVE if not provided", example = "ACTIVE")
     EmployeeStatus status;
 
+    @Schema(description = "Role in department (HEAD/STAFF). Defaults to STAFF if not provided", example = "STAFF")
     RoleInDepartment roleInDept;
 
     @NotNull(message = "Basic salary is required")
+    @Schema(description = "Basic monthly salary", example = "15000000", required = true)
     BigDecimal basicSalary;
 
     public static Builder builder() {

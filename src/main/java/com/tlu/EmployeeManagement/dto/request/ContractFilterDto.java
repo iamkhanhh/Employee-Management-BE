@@ -17,16 +17,22 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Filter criteria for searching and filtering employment contracts")
 public class ContractFilterDto {
 
+    @Schema(description = "Page number for pagination (zero-based)", example = "0")
     Integer page = 0;
 
+    @Schema(description = "Number of items per page", example = "10")
     Integer pageSize = 10;
 
+    @Schema(description = "Filter by contract status", example = "ACTIVE")
     ContractStatus status;
 
+    @Schema(description = "Filter by contract type", example = "FULL_TIME")
     ContractType contractType;
 
+    @Schema(description = "Filter by employee ID", example = "123")
     Integer empId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")

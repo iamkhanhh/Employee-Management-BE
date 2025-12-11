@@ -1,5 +1,6 @@
 package com.tlu.EmployeeManagement.dto.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,9 +11,15 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Response object containing presigned URL for uploading files to S3")
 public class PresignedUrlResponse {
+    @Schema(description = "Presigned URL for direct file upload to S3", example = "https://s3.amazonaws.com/bucket/documents/doc-123.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=...")
     String presignedUrl;
+
+    @Schema(description = "Object key/path in S3 bucket", example = "documents/2025/11/contract-123.pdf")
     String objectKey;
+
+    @Schema(description = "MIME type of the file to be uploaded", example = "application/pdf")
     String contentType;
 
     public static Builder builder() {

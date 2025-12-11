@@ -11,19 +11,27 @@ import lombok.experimental.FieldDefaults;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Response object containing employee document details")
 public class EmployeeDocumentResponse {
+    @Schema(description = "Unique identifier of the document", example = "1")
     Integer id;
 
+    @Schema(description = "Employee ID associated with this document", example = "123")
     Integer empId;
 
+    @Schema(description = "Full name of the employee", example = "Nguyễn Văn A")
     String employeeName;
 
+    @Schema(description = "Type of the document", example = "ID_CARD")
     String docType;
 
+    @Schema(description = "URL to the document file in S3 storage", example = "https://s3.amazonaws.com/bucket/documents/doc-123.pdf")
     String fileUrl;
 
+    @Schema(description = "Original filename of the uploaded document", example = "CMND_NguyenVanA.pdf")
     String originalName;
 
+    @Schema(description = "File size in bytes", example = "2048576")
     Long fileSize;
 
     @Schema(description = "Document upload timestamp", example = "15/11/2025")

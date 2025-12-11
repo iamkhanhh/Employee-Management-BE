@@ -16,14 +16,19 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Response object containing KPI evaluation criteria details")
 public class KpiCriteriaResponse {
 
+    @Schema(description = "Unique identifier of the KPI criteria", example = "1")
     Integer id;
 
+    @Schema(description = "Name of the KPI criteria", example = "Work Quality")
     String name;
 
+    @Schema(description = "Detailed description of the criteria", example = "Measures the quality and accuracy of work output")
     String description;
 
+    @Schema(description = "Weight/importance of this criteria in final score (0-1)", example = "0.30")
     BigDecimal weight;
 
     @Schema(description = "Criteria creation timestamp", example = "10/11/2025")

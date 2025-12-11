@@ -16,9 +16,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Response object containing task assignment details for an employee")
 public class TaskAssignmentResponse {
+    @Schema(description = "Unique identifier of the task assignment", example = "1")
     Integer id;
+
+    @Schema(description = "Employee ID assigned to the task", example = "123")
     Integer empId;
+
+    @Schema(description = "Full name of the assigned employee", example = "Nguyễn Văn A")
     String employeeName;
 
     @Schema(description = "Task assignment timestamp", example = "20/11/2025 10:30:00")
