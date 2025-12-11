@@ -2,6 +2,7 @@ package com.tlu.EmployeeManagement.dto.response;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,13 +13,27 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Generic paginated response wrapper for list endpoints")
 public class PagedResponse<T> {
+    @Schema(description = "List of items in the current page")
     List<T> content;
+
+    @Schema(description = "Current page number (zero-based)", example = "0")
     Integer currentPage;
+
+    @Schema(description = "Number of items per page", example = "10")
     Integer pageSize;
+
+    @Schema(description = "Total number of items across all pages", example = "100")
     Long totalElements;
+
+    @Schema(description = "Total number of pages", example = "10")
     Integer totalPages;
+
+    @Schema(description = "Indicates if there is a next page", example = "true")
     Boolean hasNext;
+
+    @Schema(description = "Indicates if there is a previous page", example = "false")
     Boolean hasPrevious;
 
     public static <T> Builder<T> builder() {

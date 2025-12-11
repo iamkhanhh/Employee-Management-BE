@@ -16,10 +16,13 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Response object containing KPI evaluation period details")
 public class KpiPeriodResponse {
 
+    @Schema(description = "Unique identifier of the KPI period", example = "1")
     Integer id;
 
+    @Schema(description = "Name of the KPI period", example = "Q1 2025 Performance Review")
     String periodName;
 
     @Schema(description = "KPI period start date", example = "01/01/2025")

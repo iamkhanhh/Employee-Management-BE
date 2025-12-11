@@ -17,8 +17,10 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Data Transfer Object for updating an existing employment contract")
 public class ContractUpdateDto {
 
+    @Schema(description = "Type of the contract", example = "FULL_TIME")
     ContractType contractType;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
@@ -29,8 +31,10 @@ public class ContractUpdateDto {
     @Schema(description = "Contract end date", example = "31/12/2025", type = "string", pattern = "dd/MM/yyyy")
     LocalDate endDate;
 
+    @Schema(description = "URL to the contract document in S3 storage", example = "1/contracts/contract-123.pdf")
     String fileUrl;
 
+    @Schema(description = "Current status of the contract", example = "ACTIVE")
     ContractStatus status;
 
     public static Builder builder() {

@@ -12,11 +12,13 @@ import lombok.experimental.FieldDefaults;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Response object containing department details")
 public class DepartmentResponse {
+    @Schema(description = "Unique identifier of the department", example = "1")
     Integer id;
 
+    @Schema(description = "Name of the department", example = "Phòng Nhân Sự")
     String deptName;
-
 
     @Schema(description = "Department creation timestamp", example = "10/11/2025")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")

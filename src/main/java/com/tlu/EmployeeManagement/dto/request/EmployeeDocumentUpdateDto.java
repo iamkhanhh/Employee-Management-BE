@@ -2,6 +2,7 @@ package com.tlu.EmployeeManagement.dto.request;
 
 import com.tlu.EmployeeManagement.enums.DocumentType;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,14 +13,19 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Data Transfer Object for updating an existing employee document")
 public class EmployeeDocumentUpdateDto {
 
+    @Schema(description = "Type of the document", example = "ID_CARD")
     DocumentType docType;
 
+    @Schema(description = "URL to the document file in S3 storage", example = "https://s3.amazonaws.com/bucket/documents/doc-123.pdf")
     String fileUrl;
 
+    @Schema(description = "Original filename of the uploaded document", example = "CMND_NguyenVanA.pdf")
     String originalName;
 
+    @Schema(description = "File size in bytes", example = "2048576")
     Long fileSize;
 
     public static Builder builder() {

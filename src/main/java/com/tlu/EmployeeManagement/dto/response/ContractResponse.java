@@ -12,13 +12,18 @@ import lombok.experimental.FieldDefaults;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Response object containing employment contract details")
 public class ContractResponse {
+    @Schema(description = "Unique identifier of the contract", example = "1")
     Integer id;
 
+    @Schema(description = "Employee ID associated with this contract", example = "123")
     Integer empId;
 
+    @Schema(description = "Full name of the employee", example = "Nguyễn Văn A")
     String employeeName;
 
+    @Schema(description = "Type of the contract", example = "FULL_TIME")
     String contractType;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
@@ -29,8 +34,10 @@ public class ContractResponse {
     @Schema(description = "Contract end date", example = "31/12/2025", type = "string", pattern = "dd/MM/yyyy")
     LocalDate endDate;
 
+    @Schema(description = "URL to the contract document in S3 storage", example = "https://s3.amazonaws.com/bucket/contracts/contract-123.pdf")
     String fileUrl;
 
+    @Schema(description = "Current status of the contract", example = "ACTIVE")
     String status;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")

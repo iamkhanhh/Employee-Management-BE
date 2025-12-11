@@ -16,20 +16,26 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Filter criteria for searching and filtering employees")
 public class EmployeeFilterDto {
 
+    @Schema(description = "Page number for pagination (zero-based)", example = "0")
     Integer page = 0;
 
+    @Schema(description = "Number of items per page", example = "10")
     Integer pageSize = 10;
 
+    @Schema(description = "Filter by employee status", example = "ACTIVE")
     EmployeeStatus status;
 
+    @Schema(description = "Filter by department ID", example = "1")
     Integer deptId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     @Schema(description = "Filter by hire date", example = "15/06/2023", type = "string", pattern = "dd/MM/yyyy")
     LocalDate hireDate;
 
+    @Schema(description = "Search term for employee name", example = "Alex")
     String search; // For searching in employee name
 
     public static Builder builder() {
