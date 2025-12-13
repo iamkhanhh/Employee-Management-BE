@@ -160,19 +160,17 @@ public class EmployeeController {
 
     @Operation(
         summary = "Get employees without KPI results",
-        description = "Retrieve a list of employees who do not have KPI results for the specified month and year. " +
+        description = "Retrieve a list of employees in a department who do not have KPI results for the specified KPI period. " +
                       "ADMIN users can filter by any department ID or get all employees. " +
                       "Department heads can only get employees from their own department."
     )
     @GetMapping("/without-kpi")
     public ApiResponse<List<EmployeeResponse>> getEmployeesWithoutKpiResults(
-            @Parameter(description = "Month (1-12)", required = true, example = "12") @RequestParam Integer month,
-            @Parameter(description = "Year", required = true, example = "2024") @RequestParam Integer year,
+            @Parameter(description = "KPI Period ID", required = true, example = "1") @RequestParam Integer kpiPeriodId,
             @Parameter(description = "Department ID (optional for ADMIN, ignored for department heads)", example = "1") @RequestParam(required = false) Integer deptId) {
 
         EmployeeWithoutKpiFilterDto filterDto = EmployeeWithoutKpiFilterDto.builder()
-            .month(month)
-            .year(year)
+            .kpiPeriodId(kpiPeriodId)
             .deptId(deptId)
             .build();
 

@@ -14,11 +14,8 @@ import lombok.experimental.FieldDefaults;
 @Schema(description = "Filter criteria for employees without KPI results")
 public class EmployeeWithoutKpiFilterDto {
 
-    @Schema(description = "Filter by month (1-12)", example = "12", minimum = "1", maximum = "12")
-    Integer month;
-
-    @Schema(description = "Filter by year", example = "2024")
-    Integer year;
+    @Schema(description = "KPI Period ID", example = "1", required = true)
+    Integer kpiPeriodId;
 
     @Schema(description = "Filter by department ID (optional for ADMIN, ignored for department heads)", example = "1")
     Integer deptId;
@@ -28,17 +25,11 @@ public class EmployeeWithoutKpiFilterDto {
     }
 
     public static class Builder {
-        private Integer month;
-        private Integer year;
+        private Integer kpiPeriodId;
         private Integer deptId;
 
-        public Builder month(Integer month) {
-            this.month = month;
-            return this;
-        }
-
-        public Builder year(Integer year) {
-            this.year = year;
+        public Builder kpiPeriodId(Integer kpiPeriodId) {
+            this.kpiPeriodId = kpiPeriodId;
             return this;
         }
 
@@ -49,8 +40,7 @@ public class EmployeeWithoutKpiFilterDto {
 
         public EmployeeWithoutKpiFilterDto build() {
             EmployeeWithoutKpiFilterDto dto = new EmployeeWithoutKpiFilterDto();
-            dto.month = this.month;
-            dto.year = this.year;
+            dto.kpiPeriodId = this.kpiPeriodId;
             dto.deptId = this.deptId;
             return dto;
         }

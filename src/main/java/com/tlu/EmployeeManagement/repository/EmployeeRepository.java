@@ -45,14 +45,12 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer>, Jp
     List<Employee> findByDeptId(Integer deptId);
 
     @Query("SELECT DISTINCT e FROM Employee e " +
-           "LEFT JOIN KpiPeriod kp ON (kp.startDate <= :endDate AND kp.endDate >= :startDate AND kp.isDeleted = false) " +
-           "LEFT JOIN KpiResults kr ON (e.id = kr.empId AND kr.kpiPeriodId = kp.id AND kr.isDeleted = false) " +
+           "LEFT JOIN KpiResults kr ON (e.id = kr.empId AND kr.kpiPeriodId = :kpiPeriodId AND kr.isDeleted = false) " +
            "WHERE e.isDeleted = false " +
            "AND (:deptId IS NULL OR e.deptId = :deptId) " +
            "AND kr.id IS NULL")
     List<Employee> findEmployeesWithoutKpiResults(
-        @Param("startDate") LocalDate startDate,
-        @Param("endDate") LocalDate endDate,
+        @Param("kpiPeriodId") Integer kpiPeriodId,
         @Param("deptId") Integer deptId
     );
 

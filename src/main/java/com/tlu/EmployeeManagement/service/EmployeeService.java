@@ -360,20 +360,14 @@ public class EmployeeService {
             throw new RuntimeException("User role not found");
         }
 
-        if (filterDto.getMonth() == null || filterDto.getYear() == null) {
-            throw new RuntimeException("Month and year are required");
+        // Validate kpiPeriodId is provided
+        if (filterDto.getKpiPeriodId() == null) {
+            throw new RuntimeException("KPI Period ID is required");
         }
-
-        if (filterDto.getMonth() < 1 || filterDto.getMonth() > 12) {
-            throw new RuntimeException("Month must be between 1 and 12");
-        }
-
-        YearMonth yearMonth = YearMonth.of(filterDto.getYear(), filterDto.getMonth());
-        LocalDate startDate = yearMonth.atDay(1);
-        LocalDate endDate = yearMonth.atEndOfMonth();
 
         Integer deptId = filterDto.getDeptId();
 
+        // Access control: Department heads can only see their department
         if (UserRole.valueOf(userRole) != UserRole.ADMIN) {
             Employee currentEmployee = employeeRepository.findByUserId(currentUserId)
                 .orElseThrow(() -> new RuntimeException("Employee not found for current user"));
@@ -382,16 +376,18 @@ public class EmployeeService {
                 throw new RuntimeException("Employee has been deleted");
             }
 
+            // Check if user is a department head
             if (currentEmployee.getRoleInDept() != RoleInDepartment.HEAD) {
                 throw new RuntimeException("Access denied. Only department heads and admins can access this resource");
             }
 
+            // Override deptId with current employee's department
             deptId = currentEmployee.getDeptId();
         }
 
+        // Fetch employees without KPI results for the specified period
         List<Employee> employees = employeeRepository.findEmployeesWithoutKpiResults(
-            startDate,
-            endDate,
+            filterDto.getKpiPeriodId(),
             deptId
         );
 
