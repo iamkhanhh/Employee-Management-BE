@@ -7,6 +7,8 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import com.tlu.EmployeeManagement.enums.EmployeeStatus;
 import com.tlu.EmployeeManagement.enums.RoleInDepartment;
@@ -41,5 +43,17 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer>, Jp
     void deleteById(Integer id);
 
     List<Employee> findByDeptId(Integer deptId);
+
+    @Query("SELECT DISTINCT e FROM Employee e " +
+           "LEFT JOIN KpiPeriod kp ON (kp.startDate <= :endDate AND kp.endDate >= :startDate AND kp.isDeleted = false) " +
+           "LEFT JOIN KpiResults kr ON (e.id = kr.empId AND kr.kpiPeriodId = kp.id AND kr.isDeleted = false) " +
+           "WHERE e.isDeleted = false " +
+           "AND (:deptId IS NULL OR e.deptId = :deptId) " +
+           "AND kr.id IS NULL")
+    List<Employee> findEmployeesWithoutKpiResults(
+        @Param("startDate") LocalDate startDate,
+        @Param("endDate") LocalDate endDate,
+        @Param("deptId") Integer deptId
+    );
 
 }

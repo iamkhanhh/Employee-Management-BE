@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.tlu.EmployeeManagement.dto.request.EmployeeCreateDto;
 import com.tlu.EmployeeManagement.dto.request.EmployeeFilterDto;
 import com.tlu.EmployeeManagement.dto.request.EmployeeUpdateDto;
+import com.tlu.EmployeeManagement.dto.request.EmployeeWithoutKpiFilterDto;
 import com.tlu.EmployeeManagement.dto.response.EmployeeResponse;
 import com.tlu.EmployeeManagement.dto.response.PagedResponse;
 import com.tlu.EmployeeManagement.dto.response.PerformanceStatisticsResponse;
@@ -22,6 +23,7 @@ import com.tlu.EmployeeManagement.entity.Employee;
 import com.tlu.EmployeeManagement.entity.User;
 import com.tlu.EmployeeManagement.enums.EmployeeStatus;
 import com.tlu.EmployeeManagement.enums.RoleInDepartment;
+import com.tlu.EmployeeManagement.enums.UserRole;
 import com.tlu.EmployeeManagement.repository.DepartmentRepository;
 import com.tlu.EmployeeManagement.repository.EmployeeRepository;
 import com.tlu.EmployeeManagement.repository.UserRepository;
@@ -345,5 +347,56 @@ public class EmployeeService {
             .pendingLeaveRequests(pendingLeaveRequests)
             .overtimeHoursThisMonth(Math.round(overtimeHoursThisMonth * 100.0) / 100.0)
             .build();
+    }
+
+    public List<EmployeeResponse> getEmployeesWithoutKpiResults(EmployeeWithoutKpiFilterDto filterDto) {
+        Integer currentUserId = SecurityUtils.getCurrentUserId();
+        if (currentUserId == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String userRole = SecurityUtils.getCurrentUserRole();
+        if (userRole == null) {
+            throw new RuntimeException("User role not found");
+        }
+
+        if (filterDto.getMonth() == null || filterDto.getYear() == null) {
+            throw new RuntimeException("Month and year are required");
+        }
+
+        if (filterDto.getMonth() < 1 || filterDto.getMonth() > 12) {
+            throw new RuntimeException("Month must be between 1 and 12");
+        }
+
+        YearMonth yearMonth = YearMonth.of(filterDto.getYear(), filterDto.getMonth());
+        LocalDate startDate = yearMonth.atDay(1);
+        LocalDate endDate = yearMonth.atEndOfMonth();
+
+        Integer deptId = filterDto.getDeptId();
+
+        if (UserRole.valueOf(userRole) != UserRole.ADMIN) {
+            Employee currentEmployee = employeeRepository.findByUserId(currentUserId)
+                .orElseThrow(() -> new RuntimeException("Employee not found for current user"));
+
+            if (currentEmployee.getIsDeleted()) {
+                throw new RuntimeException("Employee has been deleted");
+            }
+
+            if (currentEmployee.getRoleInDept() != RoleInDepartment.HEAD) {
+                throw new RuntimeException("Access denied. Only department heads and admins can access this resource");
+            }
+
+            deptId = currentEmployee.getDeptId();
+        }
+
+        List<Employee> employees = employeeRepository.findEmployeesWithoutKpiResults(
+            startDate,
+            endDate,
+            deptId
+        );
+
+        return employees.stream()
+            .map(this::toEmployeeResponse)
+            .collect(Collectors.toList());
     }
 }
