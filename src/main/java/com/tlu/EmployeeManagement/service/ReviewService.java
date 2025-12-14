@@ -483,7 +483,7 @@ public class ReviewService {
     }
 
     private RatingEmployeeType calculateRating(BigDecimal finalScore) {
-        if (finalScore.compareTo(new BigDecimal("5")) >= 0) {
+        if (finalScore.compareTo(new BigDecimal("4.5")) >= 0) {
             return RatingEmployeeType.A;
         } else if (finalScore.compareTo(new BigDecimal("4")) >= 0) {
             return RatingEmployeeType.B;

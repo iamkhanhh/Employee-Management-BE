@@ -19,7 +19,6 @@ public class EmployeeDocument extends AbtractEntity {
     @Column(name = "emp_id")
     private Integer empId;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "doc_type", length = 100)
     private DocumentType docType;
 

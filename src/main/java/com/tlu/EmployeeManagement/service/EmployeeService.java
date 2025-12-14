@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.tlu.EmployeeManagement.dto.request.EmployeeCreateDto;
 import com.tlu.EmployeeManagement.dto.request.EmployeeFilterDto;
 import com.tlu.EmployeeManagement.dto.request.EmployeeUpdateDto;
+import com.tlu.EmployeeManagement.dto.request.EmployeeWithoutKpiFilterDto;
 import com.tlu.EmployeeManagement.dto.response.EmployeeResponse;
 import com.tlu.EmployeeManagement.dto.response.PagedResponse;
 import com.tlu.EmployeeManagement.dto.response.PerformanceStatisticsResponse;
@@ -22,6 +23,7 @@ import com.tlu.EmployeeManagement.entity.Employee;
 import com.tlu.EmployeeManagement.entity.User;
 import com.tlu.EmployeeManagement.enums.EmployeeStatus;
 import com.tlu.EmployeeManagement.enums.RoleInDepartment;
+import com.tlu.EmployeeManagement.enums.UserRole;
 import com.tlu.EmployeeManagement.repository.DepartmentRepository;
 import com.tlu.EmployeeManagement.repository.EmployeeRepository;
 import com.tlu.EmployeeManagement.repository.UserRepository;
@@ -345,5 +347,52 @@ public class EmployeeService {
             .pendingLeaveRequests(pendingLeaveRequests)
             .overtimeHoursThisMonth(Math.round(overtimeHoursThisMonth * 100.0) / 100.0)
             .build();
+    }
+
+    public List<EmployeeResponse> getEmployeesWithoutKpiResults(EmployeeWithoutKpiFilterDto filterDto) {
+        Integer currentUserId = SecurityUtils.getCurrentUserId();
+        if (currentUserId == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String userRole = SecurityUtils.getCurrentUserRole();
+        if (userRole == null) {
+            throw new RuntimeException("User role not found");
+        }
+
+        // Validate kpiPeriodId is provided
+        if (filterDto.getKpiPeriodId() == null) {
+            throw new RuntimeException("KPI Period ID is required");
+        }
+
+        Integer deptId = filterDto.getDeptId();
+
+        // Access control: Department heads can only see their department
+        if (UserRole.valueOf(userRole) != UserRole.ADMIN) {
+            Employee currentEmployee = employeeRepository.findByUserId(currentUserId)
+                .orElseThrow(() -> new RuntimeException("Employee not found for current user"));
+
+            if (currentEmployee.getIsDeleted()) {
+                throw new RuntimeException("Employee has been deleted");
+            }
+
+            // Check if user is a department head
+            if (currentEmployee.getRoleInDept() != RoleInDepartment.HEAD) {
+                throw new RuntimeException("Access denied. Only department heads and admins can access this resource");
+            }
+
+            // Override deptId with current employee's department
+            deptId = currentEmployee.getDeptId();
+        }
+
+        // Fetch employees without KPI results for the specified period
+        List<Employee> employees = employeeRepository.findEmployeesWithoutKpiResults(
+            filterDto.getKpiPeriodId(),
+            deptId
+        );
+
+        return employees.stream()
+            .map(this::toEmployeeResponse)
+            .collect(Collectors.toList());
     }
 }
