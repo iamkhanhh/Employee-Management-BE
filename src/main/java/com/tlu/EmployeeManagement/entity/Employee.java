@@ -30,7 +30,6 @@ public class Employee extends AbtractEntity {
     @Column(name = "full_name", length = 150)
     private String fullName;
 
-    @Enumerated(EnumType.STRING)
     @Column(length = 10)
     private Gender gender;
 
@@ -49,11 +48,9 @@ public class Employee extends AbtractEntity {
     @Column(name = "basic_salary", precision = 12, scale = 2)
     private BigDecimal basicSalary;
 
-    @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private EmployeeStatus status = EmployeeStatus.ACTIVE;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "role_in_dept", length = 20)
     private RoleInDepartment roleInDept = RoleInDepartment.STAFF;
 

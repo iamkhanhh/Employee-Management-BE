@@ -25,7 +25,6 @@ public class Task extends AbtractEntity {
     @Column(length = 500)
     private String description;
 
-    @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private TaskStatus status = TaskStatus.PENDING;
 
