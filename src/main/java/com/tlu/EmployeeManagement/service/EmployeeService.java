@@ -264,6 +264,7 @@ public class EmployeeService {
             .gender(employee.getGender() != null ? employee.getGender().name() : null)
             .phoneNumber(employee.getPhoneNumber())
             .department(departmentName)
+            .deptId(employee.getDeptId())
             .address(employee.getAddress())
             .dob(employee.getDob())
             .hireDate(employee.getHireDate())

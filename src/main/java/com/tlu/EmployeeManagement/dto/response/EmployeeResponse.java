@@ -29,6 +29,9 @@ public class EmployeeResponse {
     @Schema(description = "Department name", example = "Human Resources")
     String department;
 
+    @Schema(description = "Department ID", example = "1")
+    Integer deptId;
+
     @Schema(description = "Residential address", example = "123 Main St, Hanoi")
     String address;
 
@@ -64,6 +67,7 @@ public class EmployeeResponse {
         private String gender;
         private String phoneNumber;
         private String department;
+        private Integer deptId;
         private String address;
         private LocalDate dob;
         private LocalDate hireDate;
@@ -94,6 +98,11 @@ public class EmployeeResponse {
 
         public Builder department(String department) {
             this.department = department;
+            return this;
+        }
+
+        public Builder deptId(Integer deptId) {
+            this.deptId = deptId;
             return this;
         }
 
@@ -139,6 +148,7 @@ public class EmployeeResponse {
             response.gender = this.gender;
             response.phoneNumber = this.phoneNumber;
             response.department = this.department;
+            response.deptId = this.deptId;
             response.address = this.address;
             response.dob = this.dob;
             response.hireDate = this.hireDate;
