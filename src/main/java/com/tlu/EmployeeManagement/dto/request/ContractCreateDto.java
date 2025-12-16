@@ -18,25 +18,30 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Data transfer object for creating a new employment contract")
 public class ContractCreateDto {
 
     @NotNull(message = "Employee ID is required")
+    @Schema(description = "ID of the employee this contract is for", example = "1", required = true)
     Integer empId;
 
     @NotNull(message = "Contract type is required")
+    @Schema(description = "Type of contract (PROBATION/FIXED_TERM/INDEFINITE)", example = "FIXED_TERM", required = true)
     ContractType contractType;
 
     @NotNull(message = "Start date is required")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-    @Schema(description = "Contract start date", example = "01/01/2024", type = "string", pattern = "dd/MM/yyyy")
+    @Schema(description = "Contract start date", example = "01/01/2024", type = "string", pattern = "dd/MM/yyyy", required = true)
     LocalDate startDate;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     @Schema(description = "Contract end date (optional for indefinite contracts)", example = "31/12/2025", type = "string", pattern = "dd/MM/yyyy")
     LocalDate endDate;
 
+    @Schema(description = "URL to the contract document file", example = "1/contracts/contract123.pdf")
     String fileUrl;
 
+    @Schema(description = "Contract status (ACTIVE/EXPIRED/TERMINATED). Defaults to ACTIVE if not provided", example = "ACTIVE")
     ContractStatus status;
 
     public static Builder builder() {

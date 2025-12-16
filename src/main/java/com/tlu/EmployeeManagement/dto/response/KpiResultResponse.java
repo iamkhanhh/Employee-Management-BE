@@ -18,28 +18,40 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Response object containing KPI evaluation result for an employee")
 public class KpiResultResponse {
 
+    @Schema(description = "Unique identifier of the KPI result", example = "1")
     Integer id;
 
+    @Schema(description = "Employee ID being evaluated", example = "123")
     Integer empId;
 
+    @Schema(description = "Full name of the employee", example = "Nguyễn Văn A")
     String empName;
 
+    @Schema(description = "ID of the KPI evaluation period", example = "1")
     Integer kpiPeriodId;
 
+    @Schema(description = "Name of the KPI evaluation period", example = "Q1 2025 Performance Review")
     String periodName;
 
+    @Schema(description = "List of scores for each KPI criteria")
     List<EmployeeReviewScoreDto> scores;
 
+    @Schema(description = "Calculated final score (weighted average)", example = "8.5")
     BigDecimal finalScore;
 
+    @Schema(description = "Overall performance rating", example = "EXCELLENT")
     RatingEmployeeType rating;
 
+    @Schema(description = "Additional comments from the reviewer", example = "Outstanding performance this quarter")
     String comment;
 
+    @Schema(description = "ID of the reviewer who recorded this result", example = "456")
     Integer recordedBy;
 
+    @Schema(description = "Full name of the reviewer", example = "Trần Thị B")
     String recordedByName;
 
     @Schema(description = "KPI result creation timestamp", example = "25/11/2025 16:00:00")

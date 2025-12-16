@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tlu.EmployeeManagement.dto.request.EmployeeCreateDto;
 import com.tlu.EmployeeManagement.dto.request.EmployeeFilterDto;
 import com.tlu.EmployeeManagement.dto.request.EmployeeUpdateDto;
+import com.tlu.EmployeeManagement.dto.request.EmployeeWithoutKpiFilterDto;
 import com.tlu.EmployeeManagement.dto.response.ApiResponse;
 import com.tlu.EmployeeManagement.dto.response.EmployeeResponse;
 import com.tlu.EmployeeManagement.dto.response.PagedResponse;
@@ -25,12 +26,15 @@ import com.tlu.EmployeeManagement.dto.response.PerformanceStatisticsResponse;
 import com.tlu.EmployeeManagement.enums.EmployeeStatus;
 import com.tlu.EmployeeManagement.service.EmployeeService;
 
-    import io.swagger.v3.oas.annotations.Operation;
-    import io.swagger.v3.oas.annotations.Parameter;
-    import io.swagger.v3.oas.annotations.responses.ApiResponses;
-    import io.swagger.v3.oas.annotations.tags.Tag;
-    import io.swagger.v3.oas.annotations.media.Content;
-    import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.util.List;
+
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -153,4 +157,30 @@ public class EmployeeController {
         apiResponse.setData(statistics);
         return apiResponse;
     }
+
+    @Operation(
+        summary = "Get employees without KPI results",
+        description = "Retrieve a list of employees in a department who do not have KPI results for the specified KPI period. " +
+                      "ADMIN users can filter by any department ID or get all employees. " +
+                      "Department heads can only get employees from their own department."
+    )
+    @GetMapping("/without-kpi")
+    public ApiResponse<List<EmployeeResponse>> getEmployeesWithoutKpiResults(
+            @Parameter(description = "KPI Period ID", required = true, example = "1") @RequestParam Integer kpiPeriodId,
+            @Parameter(description = "Department ID (optional for ADMIN, ignored for department heads)", example = "1") @RequestParam(required = false) Integer deptId) {
+
+        EmployeeWithoutKpiFilterDto filterDto = EmployeeWithoutKpiFilterDto.builder()
+            .kpiPeriodId(kpiPeriodId)
+            .deptId(deptId)
+            .build();
+
+        List<EmployeeResponse> employees = employeeService.getEmployeesWithoutKpiResults(filterDto);
+
+        ApiResponse<List<EmployeeResponse>> apiResponse = new ApiResponse<>();
+        apiResponse.setStatus("success");
+        apiResponse.setMessage("Get employees without KPI results successfully");
+        apiResponse.setData(employees);
+        return apiResponse;
+    }
+
 }

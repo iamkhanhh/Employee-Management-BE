@@ -1,5 +1,8 @@
 package com.tlu.EmployeeManagement.dto.request;
 
+import com.tlu.EmployeeManagement.enums.UserRole;
+import com.tlu.EmployeeManagement.enums.UserStatus;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -46,6 +49,18 @@ public class RegisterUserDto {
     )
     String email;
 
+    @Schema(
+        description = "User role (defaults to USER if not provided)",
+        example = "USER"
+    )
+    UserRole role;
+
+    @Schema(
+        description = "User status (defaults to ACTIVE if not provided)",
+        example = "ACTIVE"
+    )
+    UserStatus status;
+
 
     public static Builder builder() {
         return new Builder();
@@ -55,6 +70,8 @@ public class RegisterUserDto {
         private String username;
         private String password;
         private String email;
+        private UserRole role;
+        private UserStatus status;
 
         public Builder username(String username) {
             this.username = username;
@@ -71,12 +88,24 @@ public class RegisterUserDto {
             return this;
         }
 
+        public Builder role(UserRole role) {
+            this.role = role;
+            return this;
+        }
+
+        public Builder status(UserStatus status) {
+            this.status = status;
+            return this;
+        }
+
 
         public RegisterUserDto build() {
             RegisterUserDto dto = new RegisterUserDto();
             dto.username = this.username;
             dto.password = this.password;
             dto.email = this.email;
+            dto.role = this.role;
+            dto.status = this.status;
             return dto;
         }
     }

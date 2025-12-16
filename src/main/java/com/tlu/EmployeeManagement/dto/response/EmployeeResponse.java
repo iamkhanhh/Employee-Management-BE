@@ -12,17 +12,24 @@ import lombok.experimental.FieldDefaults;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Employee information response")
 public class EmployeeResponse {
+    @Schema(description = "Employee ID", example = "1")
     Integer id;
 
+    @Schema(description = "Full name of the employee", example = "Nguyen Van A")
     String fullName;
 
+    @Schema(description = "Gender (MALE/FEMALE)", example = "MALE")
     String gender;
 
+    @Schema(description = "Phone number", example = "0123456789")
     String phoneNumber;
 
+    @Schema(description = "Department name", example = "Human Resources")
     String department;
 
+    @Schema(description = "Residential address", example = "123 Main St, Hanoi")
     String address;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
@@ -33,10 +40,13 @@ public class EmployeeResponse {
     @Schema(description = "Hire date", example = "10/06/2020", type = "string", pattern = "dd/MM/yyyy")
     LocalDate hireDate;
 
+    @Schema(description = "Role in department (HEAD/STAFF)", example = "STAFF")
     String roleInDept;
 
+    @Schema(description = "Employment status (ACTIVE/ON_LEAVE/TERMINATED)", example = "ACTIVE")
     String status;
 
+    @Schema(description = "Associated username", example = "nguyenvana")
     String username;
 
 

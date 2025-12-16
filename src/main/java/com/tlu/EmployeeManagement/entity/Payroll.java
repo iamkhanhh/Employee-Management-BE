@@ -36,7 +36,6 @@ public class Payroll extends AbtractEntity {
     @Column(name = "net_salary", precision = 12, scale = 2)
     private BigDecimal netSalary;
 
-    @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private PayrollStatus status = PayrollStatus.PENDING;
 

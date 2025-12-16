@@ -32,6 +32,7 @@ import lombok.experimental.FieldDefaults;
 public class ContractService {
     ContractRepository contractRepository;
     EmployeeRepository employeeRepository;
+    S3Service s3Service;
 
     public PagedResponse<ContractResponse> getContracts(ContractFilterDto filterDto) {
         // Build specification for filtering
@@ -151,7 +152,7 @@ public class ContractService {
             .contractType(contract.getContractType() != null ? contract.getContractType().name() : null)
             .startDate(contract.getStartDate())
             .endDate(contract.getEndDate())
-            .fileUrl(contract.getFileUrl())
+            .fileUrl(s3Service.getS3Url(contract.getFileUrl()))
             .status(contract.getStatus() != null ? contract.getStatus().name() : null)
             .createdAt(contract.getCreatedAt())
             .build();

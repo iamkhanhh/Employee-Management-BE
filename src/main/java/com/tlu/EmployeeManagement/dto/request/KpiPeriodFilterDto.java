@@ -4,6 +4,9 @@ import java.time.LocalDate;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,17 +17,25 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Filter criteria for searching and filtering KPI evaluation periods")
 public class KpiPeriodFilterDto {
 
+    @Schema(description = "Page number for pagination (zero-based)", example = "0")
     Integer page = 0;
 
+    @Schema(description = "Number of items per page", example = "10")
     Integer pageSize = 10;
 
+    @Schema(description = "Search by period name", example = "Q1 2025")
     String periodName;
 
+    @Schema(description = "Filter by start date", example = "01/01/2025", type = "string", pattern = "dd/MM/yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     LocalDate startDate;
 
+    @Schema(description = "Filter by end date", example = "31/03/2025", type = "string", pattern = "dd/MM/yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     LocalDate endDate;
 

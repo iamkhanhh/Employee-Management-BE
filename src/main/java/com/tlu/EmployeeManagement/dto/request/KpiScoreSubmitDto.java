@@ -2,6 +2,7 @@ package com.tlu.EmployeeManagement.dto.request;
 
 import java.math.BigDecimal;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -13,11 +14,14 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Data Transfer Object for submitting a score for a specific KPI criteria")
 public class KpiScoreSubmitDto {
 
+    @Schema(description = "KPI criteria ID being scored", example = "1", required = true)
     @NotNull(message = "Criteria ID is required")
     Integer criteriaId;
 
+    @Schema(description = "Score value for this criteria (typically 0-10)", example = "9.0", required = true)
     @NotNull(message = "Score value is required")
     BigDecimal scoreValue;
 

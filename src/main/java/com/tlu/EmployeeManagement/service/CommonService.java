@@ -54,7 +54,10 @@ public class CommonService {
         LocalDate startOfMonth = now.withDayOfMonth(1);
         LocalDate endOfMonth = now.withDayOfMonth(now.lengthOfMonth());
 
-        Long totalEmployees = employeeRepository.countByIsDeletedAndStatus(false, EmployeeStatus.ACTIVE);
+        Long totalEmployees = employeeRepository.findByIsDeleted(false).stream()
+                .filter(emp -> emp.getStatus() != EmployeeStatus.INACTIVE
+                        && emp.getStatus() != EmployeeStatus.TERMINATED)
+                .count();
 
         Long totalDepartments = departmentRepository.countByIsDeleted(false);
 
@@ -73,10 +76,13 @@ public class CommonService {
     }
 
     private List<DepartmentPersonnelStats> getPersonnelByDepartment() {
-        List<Employee> activeEmployees = employeeRepository.findByIsDeletedAndStatus(false, EmployeeStatus.ACTIVE);
+        List<Employee> employees = employeeRepository.findByIsDeleted(false).stream()
+                .filter(emp -> emp.getStatus() != EmployeeStatus.INACTIVE
+                        && emp.getStatus() != EmployeeStatus.TERMINATED)
+                .collect(Collectors.toList());
         List<Department> departments = departmentRepository.findByIsDeleted(false);
 
-        Map<Integer, Long> employeeCountByDept = activeEmployees.stream()
+        Map<Integer, Long> employeeCountByDept = employees.stream()
                 .filter(emp -> emp.getDeptId() != null)
                 .collect(Collectors.groupingBy(
                         Employee::getDeptId,
@@ -94,8 +100,11 @@ public class CommonService {
     private List<ContractTypeStats> getContractTypeStats() {
         List<Contract> activeContracts = contractRepository.findByIsDeletedAndStatus(false, ContractStatus.ACTIVE);
 
-        List<Employee> activeEmployees = employeeRepository.findByIsDeletedAndStatus(false, EmployeeStatus.ACTIVE);
-        Map<Integer, Employee> employeeMap = activeEmployees.stream()
+        List<Employee> employees = employeeRepository.findByIsDeleted(false).stream()
+                .filter(emp -> emp.getStatus() != EmployeeStatus.INACTIVE
+                        && emp.getStatus() != EmployeeStatus.TERMINATED)
+                .collect(Collectors.toList());
+        Map<Integer, Employee> employeeMap = employees.stream()
                 .collect(Collectors.toMap(Employee::getId, emp -> emp));
 
         Map<com.tlu.EmployeeManagement.enums.ContractType, Long> contractTypeCount = activeContracts.stream()
@@ -113,10 +122,13 @@ public class CommonService {
     }
 
     private List<DepartmentSalaryStats> getSalaryByDepartment() {
-        List<Employee> activeEmployees = employeeRepository.findByIsDeletedAndStatus(false, EmployeeStatus.ACTIVE);
+        List<Employee> employees = employeeRepository.findByIsDeleted(false).stream()
+                .filter(emp -> emp.getStatus() != EmployeeStatus.INACTIVE
+                        && emp.getStatus() != EmployeeStatus.TERMINATED)
+                .collect(Collectors.toList());
         List<Department> departments = departmentRepository.findByIsDeleted(false);
 
-        Map<Integer, Double> salaryByDept = activeEmployees.stream()
+        Map<Integer, Double> salaryByDept = employees.stream()
                 .filter(emp -> emp.getDeptId() != null && emp.getBasicSalary() != null)
                 .collect(Collectors.groupingBy(
                         Employee::getDeptId,
@@ -145,13 +157,13 @@ public class CommonService {
             long count = allEmployees.stream()
                     .filter(emp -> emp.getHireDate() != null && !emp.getHireDate().isAfter(endOfMonth))
                     .filter(emp -> {
-                        if (emp.getStatus() == EmployeeStatus.ACTIVE) {
-                            return true;
+                        if (emp.getStatus() == EmployeeStatus.INACTIVE) {
+                            return false;
                         }
                         if (emp.getStatus() == EmployeeStatus.TERMINATED && emp.getUpdatedAt() != null) {
                             return emp.getUpdatedAt().toLocalDate().isAfter(endOfMonth);
                         }
-                        return false;
+                        return true;
                     })
                     .count();
 

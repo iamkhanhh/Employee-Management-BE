@@ -1,6 +1,7 @@
 package com.tlu.EmployeeManagement.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.tlu.EmployeeManagement.dto.request.EmployeeCreateDto;
 import com.tlu.EmployeeManagement.dto.request.EmployeeFilterDto;
 import com.tlu.EmployeeManagement.dto.request.EmployeeUpdateDto;
+import com.tlu.EmployeeManagement.dto.request.EmployeeWithoutKpiFilterDto;
 import com.tlu.EmployeeManagement.dto.response.EmployeeResponse;
 import com.tlu.EmployeeManagement.dto.response.PagedResponse;
 import com.tlu.EmployeeManagement.dto.response.PerformanceStatisticsResponse;
@@ -21,6 +23,7 @@ import com.tlu.EmployeeManagement.entity.Employee;
 import com.tlu.EmployeeManagement.entity.User;
 import com.tlu.EmployeeManagement.enums.EmployeeStatus;
 import com.tlu.EmployeeManagement.enums.RoleInDepartment;
+import com.tlu.EmployeeManagement.enums.UserRole;
 import com.tlu.EmployeeManagement.repository.DepartmentRepository;
 import com.tlu.EmployeeManagement.repository.EmployeeRepository;
 import com.tlu.EmployeeManagement.repository.UserRepository;
@@ -115,8 +118,23 @@ public class EmployeeService {
             .orElseThrow(() -> new RuntimeException("User not found with id: " + createDto.getUserId()));
 
         // Validate department exists
-        departmentRepository.findById(createDto.getDeptId())
+        Department dept = departmentRepository.findById(createDto.getDeptId())
             .orElseThrow(() -> new RuntimeException("Department not found with id: " + createDto.getDeptId()));
+
+        // Determine the role for the new employee
+        RoleInDepartment roleInDept = createDto.getRoleInDept() != null ? createDto.getRoleInDept() : RoleInDepartment.STAFF;
+
+        // Check if department already has a HEAD when trying to assign HEAD role
+        if (roleInDept == RoleInDepartment.HEAD) {
+            Optional<Employee> existingHead = employeeRepository.findFirstByDeptIdAndRoleInDept(
+                createDto.getDeptId(),
+                RoleInDepartment.HEAD
+            );
+
+            if (existingHead.isPresent() && !existingHead.get().getIsDeleted()) {
+                throw new RuntimeException("Department already has a head employee");
+            }
+        }
 
         Employee employee = new Employee();
         employee.setUserId(createDto.getUserId());
@@ -128,9 +146,9 @@ public class EmployeeService {
         employee.setAddress(createDto.getAddress());
         employee.setHireDate(createDto.getHireDate());
         employee.setStatus(createDto.getStatus() != null ? createDto.getStatus() : EmployeeStatus.ACTIVE);
-        employee.setRoleInDept(createDto.getRoleInDept() != null ? createDto.getRoleInDept() : RoleInDepartment.STAFF);
         employee.setBasicSalary(createDto.getBasicSalary());
         employee.setIsDeleted(false);
+        employee.setRoleInDept(roleInDept);
 
         Employee savedEmployee = employeeRepository.save(employee);
         return toEmployeeResponse(savedEmployee);
@@ -173,6 +191,24 @@ public class EmployeeService {
             employee.setStatus(updateDto.getStatus());
         }
         if (updateDto.getRoleInDept() != null) {
+            // Check if trying to change role to HEAD
+            if (updateDto.getRoleInDept() == RoleInDepartment.HEAD &&
+                employee.getRoleInDept() != RoleInDepartment.HEAD) {
+
+                // Use the current or new department ID
+                Integer targetDeptId = updateDto.getDeptId() != null ? updateDto.getDeptId() : employee.getDeptId();
+
+                Optional<Employee> existingHead = employeeRepository.findFirstByDeptIdAndRoleInDept(
+                    targetDeptId,
+                    RoleInDepartment.HEAD
+                );
+
+                if (existingHead.isPresent() &&
+                    !existingHead.get().getIsDeleted() &&
+                    !existingHead.get().getId().equals(employee.getId())) {
+                    throw new RuntimeException("Department already has a head employee");
+                }
+            }
             employee.setRoleInDept(updateDto.getRoleInDept());
         }
 
@@ -311,5 +347,52 @@ public class EmployeeService {
             .pendingLeaveRequests(pendingLeaveRequests)
             .overtimeHoursThisMonth(Math.round(overtimeHoursThisMonth * 100.0) / 100.0)
             .build();
+    }
+
+    public List<EmployeeResponse> getEmployeesWithoutKpiResults(EmployeeWithoutKpiFilterDto filterDto) {
+        Integer currentUserId = SecurityUtils.getCurrentUserId();
+        if (currentUserId == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String userRole = SecurityUtils.getCurrentUserRole();
+        if (userRole == null) {
+            throw new RuntimeException("User role not found");
+        }
+
+        // Validate kpiPeriodId is provided
+        if (filterDto.getKpiPeriodId() == null) {
+            throw new RuntimeException("KPI Period ID is required");
+        }
+
+        Integer deptId = filterDto.getDeptId();
+
+        // Access control: Department heads can only see their department
+        if (UserRole.valueOf(userRole) != UserRole.ADMIN) {
+            Employee currentEmployee = employeeRepository.findByUserId(currentUserId)
+                .orElseThrow(() -> new RuntimeException("Employee not found for current user"));
+
+            if (currentEmployee.getIsDeleted()) {
+                throw new RuntimeException("Employee has been deleted");
+            }
+
+            // Check if user is a department head
+            if (currentEmployee.getRoleInDept() != RoleInDepartment.HEAD) {
+                throw new RuntimeException("Access denied. Only department heads and admins can access this resource");
+            }
+
+            // Override deptId with current employee's department
+            deptId = currentEmployee.getDeptId();
+        }
+
+        // Fetch employees without KPI results for the specified period
+        List<Employee> employees = employeeRepository.findEmployeesWithoutKpiResults(
+            filterDto.getKpiPeriodId(),
+            deptId
+        );
+
+        return employees.stream()
+            .map(this::toEmployeeResponse)
+            .collect(Collectors.toList());
     }
 }

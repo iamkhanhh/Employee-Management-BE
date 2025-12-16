@@ -17,19 +17,21 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "Data Transfer Object for creating a new KPI evaluation period")
 public class KpiPeriodCreateDto {
 
+    @Schema(description = "Name of the KPI period", example = "Q1 2025 Performance Review", required = true)
     @NotBlank(message = "Period name is required")
     String periodName;
 
+    @Schema(description = "KPI period start date", example = "01/01/2025", type = "string", pattern = "dd/MM/yyyy", required = true)
     @NotNull(message = "Start date is required")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-    @Schema(description = "KPI period start date", example = "01/01/2025", type = "string", pattern = "dd/MM/yyyy")
     LocalDate startDate;
 
+    @Schema(description = "KPI period end date", example = "31/03/2025", type = "string", pattern = "dd/MM/yyyy", required = true)
     @NotNull(message = "End date is required")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-    @Schema(description = "KPI period end date", example = "31/03/2025", type = "string", pattern = "dd/MM/yyyy")
     LocalDate endDate;
 
     public static Builder builder() {

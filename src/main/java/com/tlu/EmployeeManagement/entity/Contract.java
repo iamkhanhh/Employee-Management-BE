@@ -22,7 +22,6 @@ public class Contract extends AbtractEntity {
     @Column(name = "emp_id")
     private Integer empId;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "contract_type", length = 50)
     private ContractType contractType;
 
@@ -35,7 +34,6 @@ public class Contract extends AbtractEntity {
     @Column(name = "file_url", length = 255)
     private String fileUrl;
 
-    @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private ContractStatus status = ContractStatus.ACTIVE;
 
